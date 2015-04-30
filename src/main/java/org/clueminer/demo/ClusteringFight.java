@@ -92,6 +92,7 @@ public class ClusteringFight extends JFrame {
                 .put("school", FakeDatasets.schoolData())
                 .put("iris", FakeDatasets.irisDataset())
                 .put("US arrests", FakeDatasets.usArrestData())
+                .put("glass", FakeDatasets.glassDataset())
                 .build();
 
         panel1 = new HacDendroPanel(map);

@@ -1,0 +1,25 @@
+# Clustering Demo
+
+Simple showcase of clustering algorithms on 2D datasets.
+
+This project depends on modules from Clueminer repository.
+
+## How to run
+
+Clone Clueminer repo if you don't have it yet. This demo should be in same directory.
+
+directory structure:
+
+```
+clueminer/
+clueminer-demo/
+``
+
+that means:
+```
+git clone https://github.com/deric/clueminer.git
+git clone https://github.com/deric/clueminer-demo.git
+cd clueminer-demo
+mvn install
+```
+and run compiled JAR.

@@ -107,4 +107,11 @@ public class HacDendroPanel extends DendroPanel {
         execute(params);
     }
 
+    @Override
+    public void cutoffChanged(String cutoff) {
+        Props params = getProperties().copy();
+        params.put(AgglParams.CUTOFF_STRATEGY, cutoff);
+        execute(params);
+    }
+
 }

@@ -130,6 +130,7 @@ public class ScatterWrapper extends JPanel implements TaskListener {
             public void run() {
                 System.out.println("algorithm: " + algorithm.getName());
                 params.put("name", getAlgorithm().getName());
+                System.out.println(params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
                 DistanceMeasure func = df.getProvider("Euclidean");
                 algorithm.setDistanceFunction(func);

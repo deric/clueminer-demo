@@ -102,9 +102,6 @@ public class ScatterWrapper extends JPanel implements TaskListener {
     void dataChanged(String datasetName) {
         setDataset(dataProvider.getDataset(datasetName));
         System.out.println("dataset changed to " + datasetName + ": " + System.identityHashCode(getDataset()));
-        if (algorithm != null) {
-            execute();
-        }
     }
 
     public ClusteringAlgorithm getAlgorithm() {

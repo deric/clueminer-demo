@@ -20,6 +20,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -58,12 +59,15 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     private ExternalEvaluator evaluator;
     private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00");
     private Clustering<? extends Cluster> clustering;
+    private final HashMap<ClusteringAlgorithm, JPanel> optPanels;
 
     public SettingsPanel(ScatterWrapper panel) {
         this.panel = panel;
+        optPanels = new HashMap<>();
         panel.addClusteringListener(this);
         initComponents();
         setDatasets(panel.getDatasets());
+
     }
 
     private void initComponents() {
@@ -75,6 +79,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 panel.dataChanged((String) dataBox.getSelectedItem());
+                panel.execute(getProps());
             }
         });
         add(dataBox);
@@ -89,7 +94,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
                 //if algorithm was really changed, trigger execution
                 if (!alg.equals(panel.getAlgorithm().getName())) {
                     panel.setAlgorithm(cf.getProvider(alg));
-                    panel.execute();
+                    panel.execute(getProps());
                 }
             }
         });
@@ -140,6 +145,9 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {
             if (dlg.isUIfor(alg)) {
                 optPanel = dlg;
+                if (!optPanels.containsKey(alg)) {
+                    optPanels.put(alg, dlg.getPanel());
+                }
                 return dlg.getPanel();
             }
         }
@@ -169,11 +177,11 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     }
 
     public Props getProps() {
-        if (optPanel != null) {
-            return optPanel.getParams();
-        } else {
-            throw new RuntimeException("missing dialog");
+        if (optPanel == null) {
+            System.out.println("alg: " + getAlgorithm());
+            getUI(getAlgorithm());
         }
+        return optPanel.getParams();
     }
 
     @Override

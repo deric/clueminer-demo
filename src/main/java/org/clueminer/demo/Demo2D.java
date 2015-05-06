@@ -16,21 +16,21 @@
  */
 package org.clueminer.demo;
 
-import com.google.common.collect.ImmutableMap;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Collection;
+import java.util.LinkedList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import org.clueminer.dataset.api.Dataset;
-import org.clueminer.dataset.api.Instance;
+import org.clueminer.dataset.api.DataProvider;
+import org.clueminer.demo.data.DataLoader;
 import org.clueminer.demo.gui.ScatterWrapper;
 import org.clueminer.demo.gui.SettingsPanel;
-import org.clueminer.fixtures.clustering.FakeDatasets;
 
 /**
  *
@@ -73,16 +73,11 @@ public class Demo2D extends JPanel {
         return frame;
     }
 
-    private ImmutableMap<String, Dataset<? extends Instance>> loadDatasets() {
+    private DataProvider loadDatasets() {
+        Collection<String> datasets = new LinkedList<>();
+        datasets.add("school");
 
-        ImmutableMap<String, Dataset<? extends Instance>> map = new ImmutableMap.Builder<String, Dataset<? extends Instance>>()
-                .put("school", FakeDatasets.schoolData())
-                .put("iris", FakeDatasets.irisDataset())
-                .put("US arrests", FakeDatasets.usArrestData())
-                .put("glass", FakeDatasets.glassDataset())
-                .build();
-
-        return map;
+        return new DataLoader(datasets);
     }
 
     private void initComponents() {

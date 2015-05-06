@@ -36,8 +36,8 @@ public class SettingsPanel extends JPanel {
 
     public SettingsPanel(ScatterWrapper panel) {
         this.panel = panel;
-        setDatasets(panel.getDatasets());
         initComponents();
+        setDatasets(panel.getDatasets());
     }
 
     private void initComponents() {

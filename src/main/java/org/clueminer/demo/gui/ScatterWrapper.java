@@ -29,9 +29,10 @@ import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
 import org.clueminer.clustering.api.Executor;
+import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
-import org.clueminer.dendrogram.DataProvider;
+import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.distance.api.DistanceFactory;
 import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
@@ -52,7 +53,7 @@ public class ScatterWrapper extends JPanel {
     private Executor exec;
 
     public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
-        this(new DataProvider(data));
+        this(new DataProviderMap(data));
     }
 
     public ScatterWrapper(DataProvider provider) {

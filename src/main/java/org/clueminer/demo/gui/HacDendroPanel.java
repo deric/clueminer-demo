@@ -21,9 +21,10 @@ import org.clueminer.clustering.ClusteringExecutorCached;
 import org.clueminer.clustering.api.AgglParams;
 import org.clueminer.clustering.api.Executor;
 import org.clueminer.clustering.api.dendrogram.DendrogramMapping;
+import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
-import org.clueminer.dendrogram.DataProvider;
+import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.dendrogram.DendroPanel;
 import org.clueminer.dgram.DgViewer;
 import org.clueminer.distance.api.DistanceFactory;
@@ -42,10 +43,10 @@ public class HacDendroPanel extends DendroPanel {
     private Executor exec;
 
     public HacDendroPanel(Map<String, Dataset<? extends Instance>> data) {
-        this(new DataProvider(data));
+        this(new DataProviderMap(data));
     }
 
-    public HacDendroPanel(DataProvider provider) {
+    public HacDendroPanel(DataProviderMap provider) {
         dataProvider = provider;
         setDataset(dataProvider.first());
         options.setDatasets(dataProvider.getDatasetNames());

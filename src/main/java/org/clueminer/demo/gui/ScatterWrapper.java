@@ -38,12 +38,15 @@ import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
 import org.clueminer.scatter.ScatterPlot;
 import org.clueminer.utils.Props;
+import org.openide.util.RequestProcessor;
+import org.openide.util.Task;
+import org.openide.util.TaskListener;
 
 /**
  *
  * @author deric
  */
-public class ScatterWrapper extends JPanel {
+public class ScatterWrapper extends JPanel implements TaskListener {
 
     protected ClusteringAlgorithm algorithm;
     private Dataset<? extends Instance> dataset;
@@ -51,6 +54,9 @@ public class ScatterWrapper extends JPanel {
     private ScatterPlot viewer;
     protected Props properties;
     private Executor exec;
+    private static final RequestProcessor RP = new RequestProcessor("Clustering");
+    private RequestProcessor.Task task;
+    private Clustering<? extends Cluster> clust;
 
     public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -109,29 +115,30 @@ public class ScatterWrapper extends JPanel {
         execute(params);
     }
 
-    public void execute(Props params) {
-        MemInfo memInfo = new MemInfo();
-
-        DistanceFactory df = DistanceFactory.getInstance();
-        DistanceMeasure func = df.getProvider("Euclidean");
+    public void execute(final Props params) {
         if (algorithm == null) {
             throw new RuntimeException("no algorithm was set");
         }
-        System.out.println("algorithm: " + algorithm.getName());
-        params.put("name", getAlgorithm().getName());
-        algorithm.setDistanceFunction(func);
+        task = RP.create(new Runnable() {
 
-        exec.setAlgorithm((AgglomerativeClustering) algorithm);
-        Clustering<? extends Cluster> clust = exec.clusterRows(dataset, params);
-        memInfo.report();
-        System.out.println("------");
+            @Override
+            public void run() {
+                System.out.println("algorithm: " + algorithm.getName());
+                params.put("name", getAlgorithm().getName());
+                DistanceFactory df = DistanceFactory.getInstance();
+                DistanceMeasure func = df.getProvider("Euclidean");
+                algorithm.setDistanceFunction(func);
 
-        viewer.setClustering(clust);
+                MemInfo memInfo = new MemInfo();
+                exec.setAlgorithm((AgglomerativeClustering) algorithm);
+                clust = exec.clusterRows(dataset, params);
+                memInfo.report();
+                System.out.println("------");
+            }
 
-
-        validate();
-        revalidate();
-        repaint();
+        });
+        task.addTaskListener(this);
+        task.schedule(0);
     }
 
     public Dataset<? extends Instance> getDataset() {
@@ -152,5 +159,19 @@ public class ScatterWrapper extends JPanel {
 
     public String[] getDatasets() {
         return dataProvider.getDatasetNames();
+    }
+
+    @Override
+    public void taskFinished(Task task) {
+        if (clust != null && clust.size() > 0 && clust.instancesCount() > 0) {
+            viewer.setClustering(clust);
+
+            validate();
+            revalidate();
+            repaint();
+        } else {
+            System.out.println("invalid clustering");
+        }
+
     }
 }

@@ -16,14 +16,21 @@
  */
 package org.clueminer.demo;
 
+import com.google.common.collect.ImmutableMap;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import org.clueminer.clustering.api.Clustering;
-import org.clueminer.fixtures.clustering.FakeClustering;
-import org.clueminer.scatter.ScatterPlot2;
+import org.clueminer.dataset.api.Dataset;
+import org.clueminer.dataset.api.Instance;
+import org.clueminer.demo.gui.ScatterWrapper;
+import org.clueminer.demo.gui.SettingsPanel;
+import org.clueminer.fixtures.clustering.FakeDatasets;
 
 /**
  *
@@ -31,7 +38,8 @@ import org.clueminer.scatter.ScatterPlot2;
  */
 public class Demo2D extends JPanel {
 
-    private ScatterPlot2 plot;
+    private ScatterWrapper plot;
+    private SettingsPanel settings;
 
     public Demo2D() {
         setPreferredSize(new Dimension(800, 600));
@@ -52,26 +60,65 @@ public class Demo2D extends JPanel {
     }
 
     public String getTitle() {
-        return "Scatter plot";
+        return "Clustering demo";
     }
 
     protected JFrame showInFrame() {
         JFrame frame = new JFrame(getTitle());
         frame.getContentPane().add(this, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(new Dimension(500, 500));
+        frame.setSize(new Dimension(800, 600));
         //frame.setSize(getPreferredSize());
         frame.setVisible(true);
         return frame;
     }
 
+    private ImmutableMap<String, Dataset<? extends Instance>> loadDatasets() {
+
+        ImmutableMap<String, Dataset<? extends Instance>> map = new ImmutableMap.Builder<String, Dataset<? extends Instance>>()
+                .put("school", FakeDatasets.schoolData())
+                .put("iris", FakeDatasets.irisDataset())
+                .put("US arrests", FakeDatasets.usArrestData())
+                .put("glass", FakeDatasets.glassDataset())
+                .build();
+
+        return map;
+    }
+
     private void initComponents() {
-        setSize(500, 500);
-        setLayout(new BorderLayout());
-        plot = new ScatterPlot2();
-        Clustering clusters = FakeClustering.iris();
-        plot.setClustering(clusters);
-        add(plot);
+        setSize(800, 600);
+
+        plot = new ScatterWrapper(loadDatasets());
+
+        GridBagLayout gbl = new GridBagLayout();
+        setLayout(gbl);
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.NORTH;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.weightx = c.weighty = 0.2; //no fill while resize
+
+        settings = new SettingsPanel(plot);
+        gbl.setConstraints(settings, c);
+        add(settings, c);
+
+        c.fill = GridBagConstraints.BOTH;
+        c.gridx = 0;
+        c.gridy = 1;
+        c.gridheight = 1;
+        c.insets = new Insets(5, 5, 5, 5);
+        c.anchor = GridBagConstraints.NORTHEAST;
+        c.weightx = c.weighty = 8.0; //ratio for filling the frame space
+
+
+        gbl.setConstraints((Component) plot, c);
+        this.add((Component) plot, c);
+        setVisible(true);
+
     }
 
 }

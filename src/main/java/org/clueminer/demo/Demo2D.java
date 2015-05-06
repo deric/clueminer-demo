@@ -22,8 +22,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -74,8 +74,9 @@ public class Demo2D extends JPanel {
     }
 
     private DataProvider loadDatasets() {
-        Collection<String> datasets = new LinkedList<>();
-        datasets.add("school");
+        Map<String, String> datasets = new HashMap<>();
+        datasets.put("donut1", "arff");
+        datasets.put("smile1", "arff");
 
         return new DataLoader(datasets);
     }

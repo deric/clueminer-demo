@@ -16,13 +16,20 @@
  */
 package org.clueminer.demo.data;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.dataset.plugin.ArrayDataset;
+import org.clueminer.io.ARFFHandler;
 import org.openide.util.Exceptions;
 
 /**
@@ -31,17 +38,17 @@ import org.openide.util.Exceptions;
  */
 public class DataLoader implements DataProvider {
 
-    private final Collection<String> datasets;
+    private final Map<String, String> datasets;
     private final Map<String, Dataset<? extends Instance>> cache;
 
-    public DataLoader(Collection<String> datasets) {
+    public DataLoader(Map<String, String> datasets) {
         this.datasets = datasets;
         this.cache = new HashMap<>(datasets.size());
     }
 
     @Override
     public String[] getDatasetNames() {
-        return datasets.toArray(new String[0]);
+        return datasets.keySet().toArray(new String[0]);
     }
 
     @Override
@@ -49,14 +56,18 @@ public class DataLoader implements DataProvider {
         if (cache.containsKey(name)) {
             return cache.get(name);
         }
-        Dataset<? extends Instance> dataset = loadDataset(name);
+        if (!datasets.containsKey(name)) {
+            throw new RuntimeException("unknown dataset " + name);
+        }
+
+        Dataset<? extends Instance> dataset = loadDataset(name, datasets.get(name));
         cache.put(name, dataset);
         return dataset;
     }
 
     @Override
     public Dataset<? extends Instance> first() {
-        return getDataset(datasets.iterator().next());
+        return getDataset(datasets.keySet().iterator().next());
     }
 
     @Override
@@ -71,20 +82,62 @@ public class DataLoader implements DataProvider {
      * @param name
      * @return
      */
-    private Dataset<? extends Instance> loadDataset(String name) {
-        java.lang.reflect.Method method = null;
+    private Dataset<? extends Instance> loadDataset(String name, String type) {
         Dataset<? extends Instance> dataset = null;
-        try {
-            method = this.getClass().getMethod(name);
-            dataset = (Dataset<? extends Instance>) method.invoke(name);
-        } catch (SecurityException e) {
-            System.err.println(e.getMessage());
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("dataset " + name + " is not supported");
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Exceptions.printStackTrace(ex);
+        switch (type) {
+            case "arff":
+                //TODO: multi dimensions support
+                dataset = new ArrayDataset(10, 2);
+                dataset.setName(name);
+                ARFFHandler arff = new ARFFHandler();
+                try {
+                    arff.load(resource(name + "." + type), dataset, 2);
+                } catch (FileNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+
+                break;
+            default:
+                throw new RuntimeException("unsupported format " + type);
         }
+
         return dataset;
+    }
+
+    /**
+     * Resource packed in jar is not possible to open directly, this method uses
+     * a .tmp file which should be on exit deleted
+     *
+     * @param path
+     * @return
+     */
+    public File resource(String path) {
+        String resource = "/datasets/" + path;
+        File file = null;
+        URL url = DataLoader.class.getResource(resource);
+        if (url == null) {
+            throw new RuntimeException("resource not found: " + path);
+        }
+
+        if (url.toString().startsWith("jar:")) {
+            try {
+                InputStream input = getClass().getResourceAsStream(resource);
+                file = File.createTempFile("nodesfile", ".tmp");
+                OutputStream out = new FileOutputStream(file);
+                int read;
+                byte[] bytes = new byte[1024];
+
+                while ((read = input.read(bytes)) != -1) {
+                    out.write(bytes, 0, read);
+                }
+                file.deleteOnExit();
+            } catch (IOException ex) {
+                System.err.println(ex.toString());
+            }
+        } else {
+            file = new File(url.getFile());
+        }
+        return file;
     }
 
 }

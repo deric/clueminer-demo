@@ -117,12 +117,14 @@ public class ScatterWrapper extends JPanel {
         if (algorithm == null) {
             throw new RuntimeException("no algorithm was set");
         }
+        System.out.println("algorithm: " + algorithm.getName());
         params.put("name", getAlgorithm().getName());
         algorithm.setDistanceFunction(func);
 
         exec.setAlgorithm((AgglomerativeClustering) algorithm);
         Clustering<? extends Cluster> clust = exec.clusterRows(dataset, params);
         memInfo.report();
+        System.out.println("------");
 
         viewer.setClustering(clust);
 

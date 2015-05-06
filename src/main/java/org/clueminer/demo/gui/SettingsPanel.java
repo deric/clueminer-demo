@@ -19,9 +19,17 @@ package org.clueminer.demo.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
+import org.clueminer.clustering.gui.ClusteringDialog;
+import org.clueminer.clustering.gui.ClusteringDialogFactory;
+import org.clueminer.utils.Props;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 /**
  *
@@ -29,10 +37,12 @@ import org.clueminer.clustering.api.ClusteringFactory;
  */
 public class SettingsPanel extends JPanel {
 
+    private JButton btnOptions;
     private JComboBox dataBox;
     private ClusteringFactory cf;
     private JComboBox algBox;
     private final ScatterWrapper panel;
+    private ClusteringDialog optPanel;
 
     public SettingsPanel(ScatterWrapper panel) {
         this.panel = panel;
@@ -68,6 +78,37 @@ public class SettingsPanel extends JPanel {
             }
         });
         add(algBox);
+
+        btnOptions = new JButton("Settings");
+        btnOptions.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogDescriptor dd = new DialogDescriptor(getUI(getAlgorithm()), "Settings");
+                if (DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
+                    updateAlgorithm();
+
+                    panel.execute(getProps());
+                }
+            }
+        });
+        add(btnOptions);
+    }
+
+    private JPanel getUI(ClusteringAlgorithm alg) {
+        for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {
+            if (dlg.isUIfor(alg)) {
+                optPanel = dlg;
+                return dlg.getPanel();
+            }
+        }
+        //last resort
+        return new JPanel();
+    }
+
+    public void updateAlgorithm() {
+        ClusteringAlgorithm algorithm = getAlgorithm();
+        optPanel.updateAlgorithm(algorithm);
     }
 
     public final void setDatasets(String[] datasets) {
@@ -76,8 +117,22 @@ public class SettingsPanel extends JPanel {
         }
     }
 
+    public ClusteringAlgorithm getAlgorithm() {
+        String algName = (String) algBox.getSelectedItem();
+        ClusteringAlgorithm algorithm = ClusteringFactory.getInstance().getProvider(algName);
+        return algorithm;
+    }
+
     public void selectAlgorithm(String algorithm) {
         algBox.setSelectedItem(algorithm);
+    }
+
+    public Props getProps() {
+        if (optPanel != null) {
+            return optPanel.getParams();
+        } else {
+            throw new RuntimeException("missing dialog");
+        }
     }
 
 }

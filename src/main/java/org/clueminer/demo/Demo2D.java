@@ -75,6 +75,7 @@ public class Demo2D extends JPanel {
 
     private DataProvider loadDatasets() {
         Map<String, String> datasets = new HashMap<>();
+        datasets.put("spiralsquare", "arff");
         datasets.put("donut1", "arff");
         datasets.put("smile1", "arff");
 

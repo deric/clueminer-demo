@@ -19,11 +19,19 @@ package org.clueminer.demo.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.clueminer.clustering.api.Cluster;
+import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
+import org.clueminer.clustering.api.ClusteringListener;
+import org.clueminer.clustering.api.ExternalEvaluator;
+import org.clueminer.clustering.api.HierarchicalResult;
+import org.clueminer.clustering.api.factory.ExternalEvaluatorFactory;
 import org.clueminer.clustering.gui.ClusteringDialog;
 import org.clueminer.clustering.gui.ClusteringDialogFactory;
 import org.clueminer.utils.Props;
@@ -35,17 +43,25 @@ import org.openide.NotifyDescriptor;
  *
  * @author deric
  */
-public class SettingsPanel extends JPanel {
+public class SettingsPanel extends JPanel implements ClusteringListener {
+
+    private static final long serialVersionUID = 4694033662557233989L;
 
     private JButton btnOptions;
     private JComboBox dataBox;
     private ClusteringFactory cf;
     private JComboBox algBox;
+    private JComboBox validationBox;
     private final ScatterWrapper panel;
     private ClusteringDialog optPanel;
+    private JLabel lbValidation;
+    private ExternalEvaluator evaluator;
+    private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+    private Clustering<? extends Cluster> clustering;
 
     public SettingsPanel(ScatterWrapper panel) {
         this.panel = panel;
+        panel.addClusteringListener(this);
         initComponents();
         setDatasets(panel.getDatasets());
     }
@@ -93,6 +109,31 @@ public class SettingsPanel extends JPanel {
             }
         });
         add(btnOptions);
+
+        validationBox = new JComboBox(ExternalEvaluatorFactory.getInstance().getProvidersArray());
+        validationBox.setSelectedItem("NMI");
+        updateEvaluator("NMI");
+        validationBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String validator = (String) validationBox.getSelectedItem();
+                if (!validator.equals(evaluator.getName())) {
+                    updateEvaluator(validator);
+                    clusteringChanged(clustering);
+                }
+            }
+        });
+
+        add(new JLabel("Validation:"));
+
+        lbValidation = new JLabel("");
+        add(lbValidation);
+        add(validationBox);
+    }
+
+    private void updateEvaluator(String validator) {
+        evaluator = ExternalEvaluatorFactory.getInstance().getProvider(validator);
     }
 
     private JPanel getUI(ClusteringAlgorithm alg) {
@@ -133,6 +174,20 @@ public class SettingsPanel extends JPanel {
         } else {
             throw new RuntimeException("missing dialog");
         }
+    }
+
+    @Override
+    public void clusteringChanged(Clustering clust) {
+        if (clust != null && evaluator != null) {
+            clustering = clust;
+            double score = evaluator.score(clust);
+            lbValidation.setText(decimalFormat.format(score));
+        }
+    }
+
+    @Override
+    public void resultUpdate(HierarchicalResult hclust) {
+        //not much to do
     }
 
 }

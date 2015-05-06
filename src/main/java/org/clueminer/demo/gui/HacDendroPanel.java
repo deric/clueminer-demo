@@ -38,6 +38,8 @@ import org.clueminer.utils.Props;
  */
 public class HacDendroPanel extends DendroPanel {
 
+    private static final long serialVersionUID = 6162521595808135571L;
+
     private boolean debug = false;
     private DataProvider dataProvider;
     private Executor exec;

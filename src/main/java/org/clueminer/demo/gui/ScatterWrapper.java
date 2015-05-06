@@ -22,12 +22,14 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Map;
 import javax.swing.JPanel;
+import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.ClusteringExecutorCached;
 import org.clueminer.clustering.api.AgglomerativeClustering;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
+import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.Executor;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
@@ -48,6 +50,8 @@ import org.openide.util.TaskListener;
  */
 public class ScatterWrapper extends JPanel implements TaskListener {
 
+    private static final long serialVersionUID = -8355392013651815767L;
+
     protected ClusteringAlgorithm algorithm;
     private Dataset<? extends Instance> dataset;
     private DataProvider dataProvider;
@@ -57,6 +61,7 @@ public class ScatterWrapper extends JPanel implements TaskListener {
     private static final RequestProcessor RP = new RequestProcessor("Clustering");
     private RequestProcessor.Task task;
     private Clustering<? extends Cluster> clust;
+    private final transient EventListenerList clusteringListeners = new EventListenerList();
 
     public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -165,13 +170,24 @@ public class ScatterWrapper extends JPanel implements TaskListener {
     public void taskFinished(Task task) {
         if (clust != null && clust.size() > 0 && clust.instancesCount() > 0) {
             viewer.setClustering(clust);
+            fireClusteringChanged(clust);
 
             validate();
             revalidate();
             repaint();
         } else {
-            System.out.println("invalid clustering");
+            System.err.println("invalid clustering");
         }
 
+    }
+
+    public void addClusteringListener(ClusteringListener listener) {
+        clusteringListeners.add(ClusteringListener.class, listener);
+    }
+
+    public void fireClusteringChanged(Clustering clust) {
+        for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
+            listener.clusteringChanged(clust);
+        }
     }
 }

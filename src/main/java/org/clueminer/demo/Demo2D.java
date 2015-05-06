@@ -22,13 +22,16 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.demo.data.DataLoader;
+import org.clueminer.demo.data.ResourceList;
 import org.clueminer.demo.gui.ScatterWrapper;
 import org.clueminer.demo.gui.SettingsPanel;
 
@@ -73,11 +76,28 @@ public class Demo2D extends JPanel {
         return frame;
     }
 
+    /**
+     * Load all resources from classpath
+     *
+     * @return
+     */
     private DataProvider loadDatasets() {
         Map<String, String> datasets = new HashMap<>();
-        datasets.put("spiralsquare", "arff");
-        datasets.put("donut1", "arff");
-        datasets.put("smile1", "arff");
+
+        Pattern pattern = Pattern.compile("(.*)datasets(.*)");
+
+        final Collection<String> list = ResourceList.getResources(pattern);
+        int idx, dot;
+        String dataset;
+        String ext;
+        for (final String name : list) {
+            idx = name.lastIndexOf("/");
+            dot = name.lastIndexOf(".");
+            dataset = name.substring(idx + 1, dot);
+            System.out.println(dataset);
+            ext = name.substring(dot + 1);
+            datasets.put(dataset, ext);
+        }
 
         return new DataLoader(datasets);
     }
@@ -110,7 +130,6 @@ public class Demo2D extends JPanel {
         c.insets = new Insets(5, 5, 5, 5);
         c.anchor = GridBagConstraints.NORTHEAST;
         c.weightx = c.weighty = 8.0; //ratio for filling the frame space
-
 
         gbl.setConstraints((Component) plot, c);
         this.add((Component) plot, c);

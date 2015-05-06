@@ -40,10 +40,12 @@ public class DataLoader implements DataProvider {
 
     private final Map<String, String> datasets;
     private final Map<String, Dataset<? extends Instance>> cache;
+    private String prefix = "datasets/artificial";
 
-    public DataLoader(Map<String, String> datasets) {
+    public DataLoader(Map<String, String> datasets, String prefix) {
         this.datasets = datasets;
         this.cache = new HashMap<>(datasets.size());
+        this.prefix = prefix;
     }
 
     @Override
@@ -112,7 +114,7 @@ public class DataLoader implements DataProvider {
      * @return
      */
     public File resource(String path) {
-        String resource = "/datasets/" + path;
+        String resource = "/" + prefix + "/" + path;
         File file = null;
         URL url = DataLoader.class.getResource(resource);
         if (url == null) {
@@ -139,6 +141,5 @@ public class DataLoader implements DataProvider {
         }
         return file;
     }
-
 
 }

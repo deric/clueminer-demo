@@ -41,6 +41,8 @@ import org.clueminer.demo.gui.SettingsPanel;
  */
 public class Demo2D extends JPanel {
 
+    private static final long serialVersionUID = 1458227382306409023L;
+
     private ScatterWrapper plot;
     private SettingsPanel settings;
 
@@ -84,7 +86,7 @@ public class Demo2D extends JPanel {
     private DataProvider loadDatasets() {
         Map<String, String> datasets = new HashMap<>();
 
-        Pattern pattern = Pattern.compile("(.*)datasets(.*)");
+        Pattern pattern = Pattern.compile("(.*)datasets/artificial(.*)");
 
         final Collection<String> list = ResourceList.getResources(pattern);
         int idx, dot;
@@ -94,12 +96,11 @@ public class Demo2D extends JPanel {
             idx = name.lastIndexOf("/");
             dot = name.lastIndexOf(".");
             dataset = name.substring(idx + 1, dot);
-            System.out.println(dataset);
             ext = name.substring(dot + 1);
             datasets.put(dataset, ext);
         }
 
-        return new DataLoader(datasets);
+        return new DataLoader(datasets, "datasets/artificial");
     }
 
     private void initComponents() {

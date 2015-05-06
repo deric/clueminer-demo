@@ -2,7 +2,7 @@
 
 Simple showcase of clustering algorithms on 2D datasets.
 
-This project depends on modules from Clueminer repository.
+This project depends on modules from Clueminer repository (not yet on Maven central).
 
 ## How to run
 
@@ -13,9 +13,9 @@ directory structure:
 ```
 clueminer/
 clueminer-demo/
-``
+```
 
-that means:
+that means following sequence of commands:
 ```
 git clone https://github.com/deric/clueminer.git
 git clone https://github.com/deric/clueminer-demo.git

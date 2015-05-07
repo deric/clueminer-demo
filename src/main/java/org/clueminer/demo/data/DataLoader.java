@@ -95,7 +95,7 @@ public class DataLoader implements DataProvider {
                 dataset.setName(name);
                 ARFFHandler arff = new ARFFHandler();
                 try {
-                    arff.load(resource(name + "." + type), dataset, 2);
+                    arff.load(resource(name + "." + type), dataset);
                 } catch (FileNotFoundException ex) {
                     Exceptions.printStackTrace(ex);
                 }

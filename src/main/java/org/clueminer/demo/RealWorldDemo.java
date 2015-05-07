@@ -23,22 +23,19 @@ import java.awt.Insets;
 import javax.swing.SwingUtilities;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.demo.data.DataLoader;
-import org.clueminer.demo.gui.ScatterWrapper;
+import org.clueminer.demo.gui.MatrixWrapper;
 import org.clueminer.demo.gui.SettingsPanel;
 
 /**
- * Simple GUI for displaying clustering results
  *
  * @author deric
  */
-public class Demo2D extends BaseFrame {
+public class RealWorldDemo extends BaseFrame {
 
-    private static final long serialVersionUID = 1458227382306409023L;
-
-    private ScatterWrapper plot;
+    private MatrixWrapper plot;
     private SettingsPanel settings;
 
-    public Demo2D() {
+    public RealWorldDemo() {
         initComponents();
     }
 
@@ -50,24 +47,19 @@ public class Demo2D extends BaseFrame {
 
             @Override
             public void run() {
-                new Demo2D().showInFrame();
+                new RealWorldDemo().showInFrame();
             }
         });
     }
 
-    /**
-     * Load all resources from classpath
-     *
-     * @return
-     */
     private DataProvider loadDatasets() {
-        return DataLoader.createLoader("datasets/artificial");
+        return DataLoader.createLoader("datasets/real-world");
     }
 
     private void initComponents() {
         setSize(800, 600);
 
-        plot = new ScatterWrapper(loadDatasets());
+        plot = new MatrixWrapper(loadDatasets());
 
         GridBagLayout gbl = new GridBagLayout();
         setLayout(gbl);

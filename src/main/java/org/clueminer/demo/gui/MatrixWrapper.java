@@ -20,7 +20,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.ClusteringExecutorCached;
@@ -34,28 +33,24 @@ import org.clueminer.clustering.api.Executor;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
-import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.distance.api.DistanceFactory;
 import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
-import org.clueminer.scatter.ScatterPlot;
+import org.clueminer.scatter.matrix.ScatterMatrixPanel;
 import org.clueminer.utils.Props;
 import org.openide.util.RequestProcessor;
-import org.openide.util.Task;
 import org.openide.util.TaskListener;
 
 /**
  *
  * @author deric
  */
-public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewer {
+public class MatrixWrapper extends JPanel implements TaskListener, DatasetViewer {
 
-    private static final long serialVersionUID = -8355392013651815767L;
-
+    private ScatterMatrixPanel viewer;
     protected ClusteringAlgorithm algorithm;
     private Dataset<? extends Instance> dataset;
     private DataProvider dataProvider;
-    private ScatterPlot viewer;
     protected Props properties;
     private Executor exec;
     private static final RequestProcessor RP = new RequestProcessor("Clustering");
@@ -63,11 +58,7 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
     private Clustering<? extends Cluster> clust;
     private final transient EventListenerList clusteringListeners = new EventListenerList();
 
-    public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
-        this(new DataProviderMap(data));
-    }
-
-    public ScatterWrapper(DataProvider provider) {
+    public MatrixWrapper(DataProvider provider) {
         dataProvider = provider;
         properties = new Props();
         setDataset(dataProvider.first());
@@ -82,7 +73,7 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
 
-        viewer = new ScatterPlot();
+        viewer = new ScatterMatrixPanel();
         c.fill = GridBagConstraints.BOTH;
         c.gridx = 0;
         c.gridy = 0;
@@ -160,13 +151,13 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
         return properties;
     }
 
-    @Override
     public String[] getDatasets() {
         return dataProvider.getDatasetNames();
     }
 
     @Override
-    public void taskFinished(Task task) {
+    public void taskFinished(org.openide.util.Task task) {
+        System.out.println("task? " + task.toString());
         if (clust != null && clust.size() > 0 && clust.instancesCount() > 0) {
             viewer.setClustering(clust);
             fireClusteringChanged(clust);
@@ -179,13 +170,16 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
         }
     }
 
+    @Override
     public void addClusteringListener(ClusteringListener listener) {
         clusteringListeners.add(ClusteringListener.class, listener);
     }
 
+    @Override
     public void fireClusteringChanged(Clustering clust) {
         for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
             listener.clusteringChanged(clust);
         }
     }
+
 }

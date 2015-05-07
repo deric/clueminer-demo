@@ -53,7 +53,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     private ClusteringFactory cf;
     private JComboBox algBox;
     private JComboBox validationBox;
-    private final ScatterWrapper panel;
+    private final DatasetViewer panel;
     private ClusteringDialog optPanel;
     private JLabel lbValidation;
     private ExternalEvaluator evaluator;
@@ -61,7 +61,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     private Clustering<? extends Cluster> clustering;
     private final HashMap<ClusteringAlgorithm, JPanel> optPanels;
 
-    public SettingsPanel(ScatterWrapper panel) {
+    public SettingsPanel(DatasetViewer panel) {
         this.panel = panel;
         optPanels = new HashMap<>();
         panel.addClusteringListener(this);

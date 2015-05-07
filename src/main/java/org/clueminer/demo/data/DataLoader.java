@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -140,6 +142,26 @@ public class DataLoader implements DataProvider {
             file = new File(url.getFile());
         }
         return file;
+    }
+
+    public static DataProvider createLoader(String path) {
+        Map<String, String> datasets = new HashMap<>();
+
+        Pattern pattern = Pattern.compile("(.*)" + path + "(.*)");
+
+        final Collection<String> list = ResourceList.getResources(pattern);
+        int idx, dot;
+        String dataset;
+        String ext;
+        for (final String name : list) {
+            idx = name.lastIndexOf("/");
+            dot = name.lastIndexOf(".");
+            dataset = name.substring(idx + 1, dot);
+            ext = name.substring(dot + 1);
+            datasets.put(dataset, ext);
+        }
+
+        return new DataLoader(datasets, path);
     }
 
 }

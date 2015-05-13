@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.ClusteringExecutorCached;
-import org.clueminer.clustering.api.AgglomerativeClustering;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
@@ -133,7 +132,7 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
                 algorithm.setDistanceFunction(func);
 
                 MemInfo memInfo = new MemInfo();
-                exec.setAlgorithm((AgglomerativeClustering) algorithm);
+                exec.setAlgorithm(algorithm);
                 clust = exec.clusterRows(dataset, params);
                 memInfo.report();
                 System.out.println("------");

@@ -20,19 +20,9 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import javax.swing.JPanel;
-import javax.swing.event.EventListenerList;
-import org.clueminer.clustering.ClusteringExecutorCached;
-import org.clueminer.clustering.api.AgglomerativeClustering;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
-import org.clueminer.clustering.api.ClusteringAlgorithm;
-import org.clueminer.clustering.api.ClusteringFactory;
-import org.clueminer.clustering.api.ClusteringListener;
-import org.clueminer.clustering.api.Executor;
 import org.clueminer.dataset.api.DataProvider;
-import org.clueminer.dataset.api.Dataset;
-import org.clueminer.dataset.api.Instance;
 import org.clueminer.distance.api.DistanceFactory;
 import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
@@ -45,30 +35,19 @@ import org.openide.util.TaskListener;
  *
  * @author deric
  */
-public class MatrixWrapper extends JPanel implements TaskListener, DatasetViewer {
+public class MatrixWrapper extends AbstractClusteringViewer implements TaskListener, DatasetViewer {
 
     private ScatterMatrixPanel viewer;
-    protected ClusteringAlgorithm algorithm;
-    private Dataset<? extends Instance> dataset;
-    private DataProvider dataProvider;
-    protected Props properties;
-    private Executor exec;
     private static final RequestProcessor RP = new RequestProcessor("Clustering");
     private RequestProcessor.Task task;
     private Clustering<? extends Cluster> clust;
-    private final transient EventListenerList clusteringListeners = new EventListenerList();
 
     public MatrixWrapper(DataProvider provider) {
-        dataProvider = provider;
-        properties = new Props();
-        setDataset(dataProvider.first());
-        exec = new ClusteringExecutorCached();
-        algorithm = ClusteringFactory.getInstance().getDefault();
-        //options.setDatasets(dataProvider.getDatasetNames());
-        initComponets();
+        super(provider);
     }
 
-    private void initComponets() {
+    @Override
+    protected void initComponets() {
         GridBagLayout gbl = new GridBagLayout();
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
@@ -90,24 +69,13 @@ public class MatrixWrapper extends JPanel implements TaskListener, DatasetViewer
         viewer.setClustering(clusters);
     }
 
-    public void dataChanged(String datasetName) {
-        setDataset(dataProvider.getDataset(datasetName));
-        System.out.println("dataset changed to " + datasetName + ": " + System.identityHashCode(getDataset()));
-    }
-
-    public ClusteringAlgorithm getAlgorithm() {
-        return algorithm;
-    }
-
-    public void setAlgorithm(ClusteringAlgorithm alg) {
-        this.algorithm = alg;
-    }
-
+    @Override
     public void execute() {
         Props params = getProperties().copy();
         execute(params);
     }
 
+    @Override
     public void execute(final Props params) {
         if (algorithm == null) {
             throw new RuntimeException("no algorithm was set");
@@ -124,7 +92,7 @@ public class MatrixWrapper extends JPanel implements TaskListener, DatasetViewer
                 algorithm.setDistanceFunction(func);
 
                 MemInfo memInfo = new MemInfo();
-                exec.setAlgorithm((AgglomerativeClustering) algorithm);
+                exec.setAlgorithm(algorithm);
                 clust = exec.clusterRows(dataset, params);
                 memInfo.report();
                 System.out.println("------");
@@ -133,26 +101,6 @@ public class MatrixWrapper extends JPanel implements TaskListener, DatasetViewer
         });
         task.addTaskListener(this);
         task.schedule(0);
-    }
-
-    public Dataset<? extends Instance> getDataset() {
-        return dataset;
-    }
-
-    public final void setDataset(Dataset<? extends Instance> dataset) {
-        this.dataset = dataset;
-    }
-
-    public void setProperties(Props props) {
-        this.properties = props;
-    }
-
-    public Props getProperties() {
-        return properties;
-    }
-
-    public String[] getDatasets() {
-        return dataProvider.getDatasetNames();
     }
 
     @Override
@@ -170,16 +118,5 @@ public class MatrixWrapper extends JPanel implements TaskListener, DatasetViewer
         }
     }
 
-    @Override
-    public void addClusteringListener(ClusteringListener listener) {
-        clusteringListeners.add(ClusteringListener.class, listener);
-    }
-
-    @Override
-    public void fireClusteringChanged(Clustering clust) {
-        for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
-            listener.clusteringChanged(clust);
-        }
-    }
 
 }

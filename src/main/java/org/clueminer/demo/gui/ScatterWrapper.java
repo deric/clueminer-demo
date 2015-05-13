@@ -21,17 +21,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Map;
-import javax.swing.JPanel;
-import javax.swing.event.EventListenerList;
-import org.clueminer.clustering.ClusteringExecutorCached;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
-import org.clueminer.clustering.api.ClusteringAlgorithm;
-import org.clueminer.clustering.api.ClusteringFactory;
 import org.clueminer.clustering.api.ClusteringListener;
-import org.clueminer.clustering.api.Executor;
-import org.clueminer.colors.ColorBrewer;
-import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -49,38 +41,25 @@ import org.openide.util.TaskListener;
  *
  * @author deric
  */
-public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewer {
+public class ScatterWrapper extends AbstractClusteringViewer implements TaskListener, DatasetViewer {
 
     private static final long serialVersionUID = -8355392013651815767L;
 
-    protected ClusteringAlgorithm algorithm;
-    private Dataset<? extends Instance> dataset;
-    private DataProvider dataProvider;
     private ScatterPlot viewer;
-    protected Props properties;
-    private Executor exec;
     private static final RequestProcessor RP = new RequestProcessor("Clustering");
     private RequestProcessor.Task task;
     private Clustering<? extends Cluster> clust;
-    private final transient EventListenerList clusteringListeners = new EventListenerList();
-    private ColorGenerator cg;
 
     public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
     }
 
     public ScatterWrapper(DataProvider provider) {
-        dataProvider = provider;
-        properties = new Props();
-        setDataset(dataProvider.first());
-        exec = new ClusteringExecutorCached();
-        setAlgorithm(ClusteringFactory.getInstance().getDefault());
-        cg = new ColorBrewer();
-        //options.setDatasets(dataProvider.getDatasetNames());
-        initComponets();
+        super(provider);
     }
 
-    private void initComponets() {
+    @Override
+    protected void initComponets() {
         GridBagLayout gbl = new GridBagLayout();
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
@@ -102,27 +81,6 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
         viewer.setClustering(clusters);
     }
 
-    @Override
-    public void dataChanged(String datasetName) {
-        setDataset(dataProvider.getDataset(datasetName));
-        System.out.println("dataset changed to " + datasetName + ": " + System.identityHashCode(getDataset()));
-    }
-
-    @Override
-    public ClusteringAlgorithm getAlgorithm() {
-        return algorithm;
-    }
-
-    @Override
-    public final void setAlgorithm(ClusteringAlgorithm alg) {
-        this.algorithm = alg;
-        alg.setColorGenerator(cg);
-    }
-
-    public void execute() {
-        Props params = getProperties().copy();
-        execute(params);
-    }
 
     public void execute(final Props params) {
         if (algorithm == null) {
@@ -149,27 +107,6 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
         });
         task.addTaskListener(this);
         task.schedule(0);
-    }
-
-    public Dataset<? extends Instance> getDataset() {
-        return dataset;
-    }
-
-    public final void setDataset(Dataset<? extends Instance> dataset) {
-        this.dataset = dataset;
-    }
-
-    public void setProperties(Props props) {
-        this.properties = props;
-    }
-
-    public Props getProperties() {
-        return properties;
-    }
-
-    @Override
-    public String[] getDatasets() {
-        return dataProvider.getDatasetNames();
     }
 
     @Override

@@ -23,3 +23,9 @@ cd clueminer-demo
 mvn install
 ```
 and run compiled JAR.
+
+On Linux you can use the Bash script:
+
+```
+$ ./run
+```

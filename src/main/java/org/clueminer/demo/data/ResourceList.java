@@ -42,8 +42,7 @@ public class ResourceList {
      * @param pattern the pattern to match
      * @return the resources in the order they are found
      */
-    public static Collection<String> getResources(
-            final Pattern pattern) {
+    public static Collection<String> getResources(final Pattern pattern) {
         final List<String> retval = new LinkedList<>();
         final String classPath = System.getProperty("java.class.path", ".");
         final String[] classPathElements = classPath.split(":");
@@ -53,21 +52,22 @@ public class ResourceList {
         return retval;
     }
 
-    private static Collection<String> getResources(
-            final String element,
-            final Pattern pattern) {
+    private static Collection<String> getResources(final String element, final Pattern pattern) {
         final List<String> retval = new LinkedList<>();
         final File file = new File(element);
         if (file.isDirectory()) {
             retval.addAll(getResourcesFromDirectory(file, pattern));
         } else {
-            retval.addAll(getResourcesFromJarFile(file, pattern));
+            if (file.exists()) {
+                retval.addAll(getResourcesFromJarFile(file, pattern));
+            } else {
+                System.err.println("can't open file: " + file);
+            }
         }
         return retval;
     }
 
-    private static Collection<String> getResourcesFromJarFile(
-            final File file,
+    private static Collection<String> getResourcesFromJarFile(final File file,
             final Pattern pattern) {
         final List<String> retval = new ArrayList<>();
         ZipFile zf;

@@ -30,6 +30,8 @@ import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
 import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.Executor;
+import org.clueminer.colors.ColorBrewer;
+import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -61,6 +63,7 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
     private RequestProcessor.Task task;
     private Clustering<? extends Cluster> clust;
     private final transient EventListenerList clusteringListeners = new EventListenerList();
+    private ColorGenerator cg;
 
     public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -71,7 +74,8 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
         properties = new Props();
         setDataset(dataProvider.first());
         exec = new ClusteringExecutorCached();
-        algorithm = ClusteringFactory.getInstance().getDefault();
+        setAlgorithm(ClusteringFactory.getInstance().getDefault());
+        cg = new ColorBrewer();
         //options.setDatasets(dataProvider.getDatasetNames());
         initComponets();
     }
@@ -98,17 +102,21 @@ public class ScatterWrapper extends JPanel implements TaskListener, DatasetViewe
         viewer.setClustering(clusters);
     }
 
+    @Override
     public void dataChanged(String datasetName) {
         setDataset(dataProvider.getDataset(datasetName));
         System.out.println("dataset changed to " + datasetName + ": " + System.identityHashCode(getDataset()));
     }
 
+    @Override
     public ClusteringAlgorithm getAlgorithm() {
         return algorithm;
     }
 
-    public void setAlgorithm(ClusteringAlgorithm alg) {
+    @Override
+    public final void setAlgorithm(ClusteringAlgorithm alg) {
         this.algorithm = alg;
+        alg.setColorGenerator(cg);
     }
 
     public void execute() {

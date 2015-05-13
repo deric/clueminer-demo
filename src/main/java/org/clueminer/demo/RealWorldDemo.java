@@ -32,6 +32,8 @@ import org.clueminer.demo.gui.SettingsPanel;
  */
 public class RealWorldDemo extends BaseFrame {
 
+    private static final long serialVersionUID = 8659317701969970764L;
+
     private MatrixWrapper plot;
     private SettingsPanel settings;
 

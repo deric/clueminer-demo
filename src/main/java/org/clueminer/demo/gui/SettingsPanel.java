@@ -142,6 +142,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     }
 
     private JPanel getUI(ClusteringAlgorithm alg) {
+        optPanel = null;
         for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {
             if (dlg.isUIfor(alg)) {
                 optPanel = dlg;
@@ -157,7 +158,9 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
 
     public void updateAlgorithm() {
         ClusteringAlgorithm algorithm = getAlgorithm();
-        optPanel.updateAlgorithm(algorithm);
+        if (optPanel != null) {
+            optPanel.updateAlgorithm(algorithm);
+        }
     }
 
     public final void setDatasets(String[] datasets) {
@@ -181,7 +184,11 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
             System.out.println("alg: " + getAlgorithm());
             getUI(getAlgorithm());
         }
-        return optPanel.getParams();
+        if (optPanel != null) {
+            return optPanel.getParams();
+        } else {
+            return new Props();
+        }
     }
 
     @Override

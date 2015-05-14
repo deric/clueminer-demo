@@ -17,6 +17,8 @@
 package org.clueminer.demo.gui;
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.concurrent.TimeUnit;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -39,12 +41,15 @@ public class StatusPanel extends JPanel implements ClusteringListener {
     private JLabel lbStatus;
     private JButton btnStop;
     private long startTime;
+    private final DatasetViewer plot;
 
-    public StatusPanel() {
+    public StatusPanel(DatasetViewer plot) {
+        this.plot = plot;
         initComponents();
     }
 
     private void initComponents() {
+        plot.addClusteringListener(this);
         setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         lbStatus = new JLabel("");
         add(lbStatus);
@@ -55,12 +60,25 @@ public class StatusPanel extends JPanel implements ClusteringListener {
         btnStop.setEnabled(false);
         add(btnStop);
         btnStop.setVisible(false);
+        btnStop.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnStop.setEnabled(false);
+                plot.abort();
+                btnStop.setEnabled(true);
+            }
+        });
     }
 
     @Override
     public void clusteringChanged(Clustering clust) {
         long time = System.currentTimeMillis() - startTime;
-        lbStatus.setText("Clustering took " + TimeUnit.MILLISECONDS.convert(time, TimeUnit.MILLISECONDS) + " ms");
+        if (clust != null) {
+            lbStatus.setText("Clustering took " + TimeUnit.MILLISECONDS.convert(time, TimeUnit.MILLISECONDS) + " ms");
+        } else {
+            lbStatus.setText("Clustering stopped.");
+        }
         progressBar.setVisible(false);
         btnStop.setEnabled(false);
         btnStop.setVisible(false);

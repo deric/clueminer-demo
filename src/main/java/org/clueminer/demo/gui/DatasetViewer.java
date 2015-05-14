@@ -37,9 +37,17 @@ public interface DatasetViewer {
 
     void setDataset(Dataset<? extends Instance> dataset);
 
-    void execute();
-
+    /**
+     * Start clustering
+     *
+     * @param params
+     */
     void execute(final Props params);
+
+    /**
+     * Abort current clustering, if any
+     */
+    void abort();
 
     void setAlgorithm(ClusteringAlgorithm alg);
 

@@ -81,8 +81,7 @@ public class RealWorldDemo extends BaseFrame {
         add(settings, c);
         //status bar
         c.gridy = 2;
-        status = new StatusPanel();
-        plot.addClusteringListener(status);
+        status = new StatusPanel(plot);
         add(status, c);
 
         c.fill = GridBagConstraints.BOTH;

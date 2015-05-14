@@ -30,6 +30,7 @@ import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.utils.Props;
+import org.openide.util.RequestProcessor;
 
 /**
  *
@@ -44,6 +45,8 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
     protected Executor exec;
     protected ColorGenerator cg;
     protected final transient EventListenerList clusteringListeners = new EventListenerList();
+    protected static final RequestProcessor RP = new RequestProcessor("Clustering");
+    protected RequestProcessor.Task task;
 
     public AbstractClusteringViewer(DataProvider provider) {
         dataProvider = provider;
@@ -74,6 +77,7 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
         execute(params);
     }
 
+    @Override
     public Dataset<? extends Instance> getDataset() {
         return dataset;
     }
@@ -119,4 +123,14 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
             listener.clusteringStarted(dataset, param);
         }
     }
+
+    @Override
+    public void abort() {
+        if (task != null) {
+            task.cancel();
+        }
+        //no result yet
+        fireClusteringChanged(null);
+    }
+
 }

@@ -32,7 +32,6 @@ import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
 import org.clueminer.scatter.ScatterPlot;
 import org.clueminer.utils.Props;
-import org.openide.util.RequestProcessor;
 import org.openide.util.Task;
 import org.openide.util.TaskListener;
 
@@ -45,8 +44,6 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
     private static final long serialVersionUID = -8355392013651815767L;
 
     private ScatterPlot viewer;
-    private static final RequestProcessor RP = new RequestProcessor("Clustering");
-    private RequestProcessor.Task task;
     private Clustering<? extends Cluster> clust;
 
     public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
@@ -79,7 +76,6 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
     public void setClustering(Clustering clusters) {
         viewer.setClustering(clusters);
     }
-
 
     @Override
     public void execute(final Props params) {

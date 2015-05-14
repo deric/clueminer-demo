@@ -70,12 +70,6 @@ public class MatrixWrapper extends AbstractClusteringViewer implements TaskListe
     }
 
     @Override
-    public void execute() {
-        Props params = getProperties().copy();
-        execute(params);
-    }
-
-    @Override
     public void execute(final Props params) {
         if (algorithm == null) {
             throw new RuntimeException("no algorithm was set");

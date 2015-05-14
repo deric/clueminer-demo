@@ -75,7 +75,16 @@ public class StatusPanel extends JPanel implements ClusteringListener {
     public void clusteringChanged(Clustering clust) {
         long time = System.currentTimeMillis() - startTime;
         if (clust != null) {
-            lbStatus.setText("Clustering took " + TimeUnit.MILLISECONDS.convert(time, TimeUnit.MILLISECONDS) + " ms");
+            StringBuilder sb = new StringBuilder();
+            sb.append("Clustering took ").append(TimeUnit.MILLISECONDS.convert(time, TimeUnit.MILLISECONDS))
+                    .append(" ms, ");
+            Dataset<? extends Instance> dataset = clust.getLookup().lookup(Dataset.class);
+            if (dataset != null) {
+                sb.append(" dataset size: ").append(dataset.size()).append(" x ")
+                        .append(dataset.attributeCount());
+            }
+
+            lbStatus.setText(sb.toString());
         } else {
             lbStatus.setText("Clustering stopped.");
         }

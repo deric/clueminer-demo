@@ -22,10 +22,15 @@ git clone https://github.com/deric/clueminer-demo.git
 cd clueminer-demo
 mvn install
 ```
-and run compiled JAR.
+and run compiled JAR. Note that dependent libraries will be placed in `targer/libs`.
 
 On Linux you can use the Bash script:
 
 ```
 $ ./run
+```
+
+Single JAR compilation:
+```
+$ mvn assembly:assembly
 ```

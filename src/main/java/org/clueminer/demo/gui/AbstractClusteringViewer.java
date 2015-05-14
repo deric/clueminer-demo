@@ -101,6 +101,7 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
         return dataProvider.getDatasetNames();
     }
 
+    @Override
     public void dataChanged(String datasetName) {
         setDataset(dataProvider.getDataset(datasetName));
         System.out.println("dataset changed to " + datasetName + ": " + System.identityHashCode(getDataset()));

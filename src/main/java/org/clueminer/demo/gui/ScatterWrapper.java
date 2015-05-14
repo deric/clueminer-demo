@@ -23,6 +23,7 @@ import java.awt.Insets;
 import java.util.Map;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
+import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -116,6 +117,23 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
         } else {
             System.err.println("invalid clustering");
         }
+    }
+
+    @Override
+    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+        //
+    }
+
+    @Override
+    public void clusteringChanged(Clustering clust) {
+        if (clust != null) {
+            viewer.setClustering(clust);
+        }
+    }
+
+    @Override
+    public void resultUpdate(HierarchicalResult hclust) {
+        //
     }
 
 }

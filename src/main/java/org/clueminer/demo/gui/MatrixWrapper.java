@@ -22,7 +22,10 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
+import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.dataset.api.DataProvider;
+import org.clueminer.dataset.api.Dataset;
+import org.clueminer.dataset.api.Instance;
 import org.clueminer.distance.api.DistanceFactory;
 import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
@@ -109,5 +112,21 @@ public class MatrixWrapper extends AbstractClusteringViewer implements TaskListe
         }
     }
 
+    @Override
+    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+        //
+    }
+
+    @Override
+    public void clusteringChanged(Clustering clust) {
+        if (clust != null) {
+            viewer.setClustering(clust);
+        }
+    }
+
+    @Override
+    public void resultUpdate(HierarchicalResult hclust) {
+        //
+    }
 
 }

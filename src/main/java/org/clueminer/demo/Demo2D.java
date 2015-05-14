@@ -23,6 +23,7 @@ import java.awt.Insets;
 import javax.swing.SwingUtilities;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.demo.data.DataLoader;
+import org.clueminer.demo.gui.DendroWrapper;
 import org.clueminer.demo.gui.ScatterWrapper;
 import org.clueminer.demo.gui.SettingsPanel;
 import org.clueminer.demo.gui.StatusPanel;
@@ -38,7 +39,8 @@ public class Demo2D extends BaseFrame {
 
     private ScatterWrapper plot;
     private SettingsPanel settings;
-
+    private boolean showDendro = true;
+    private DendroWrapper dendro;
 
     public Demo2D() {
         initComponents();
@@ -97,8 +99,17 @@ public class Demo2D extends BaseFrame {
         c.gridheight = 1;
         c.insets = new Insets(5, 5, 5, 5);
         c.anchor = GridBagConstraints.NORTHEAST;
-        c.weightx = c.weighty = 8.0; //ratio for filling the frame space
-
+        c.weighty = 8.0;
+        if (showDendro) {
+            c.weightx = 0.5;
+            dendro = new DendroWrapper(plot);
+            plot.addClusteringListener(dendro);
+            c.gridx = 1;
+            add(dendro, c);
+        } else {
+            c.weightx = 0.8; //ratio for filling the frame space
+        }
+        c.gridx = 0;
         gbl.setConstraints((Component) plot, c);
         this.add((Component) plot, c);
         setVisible(true);

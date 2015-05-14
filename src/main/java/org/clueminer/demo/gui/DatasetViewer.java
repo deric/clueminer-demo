@@ -27,7 +27,7 @@ import org.clueminer.utils.Props;
  *
  * @author deric
  */
-public interface DatasetViewer {
+public interface DatasetViewer extends ClusteringListener {
 
     void addClusteringListener(ClusteringListener listener);
 

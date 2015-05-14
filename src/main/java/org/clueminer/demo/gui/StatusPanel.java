@@ -17,6 +17,8 @@
 package org.clueminer.demo.gui;
 
 import java.awt.FlowLayout;
+import java.util.concurrent.TimeUnit;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -35,6 +37,8 @@ public class StatusPanel extends JPanel implements ClusteringListener {
 
     private JProgressBar progressBar;
     private JLabel lbStatus;
+    private JButton btnStop;
+    private long startTime;
 
     public StatusPanel() {
         initComponents();
@@ -47,12 +51,19 @@ public class StatusPanel extends JPanel implements ClusteringListener {
         progressBar = new JProgressBar();
         progressBar.setVisible(false);
         add(progressBar);
+        btnStop = new JButton("Stop");
+        btnStop.setEnabled(false);
+        add(btnStop);
+        btnStop.setVisible(false);
     }
 
     @Override
     public void clusteringChanged(Clustering clust) {
-        lbStatus.setText("");
+        long time = System.currentTimeMillis() - startTime;
+        lbStatus.setText("Clustering took " + TimeUnit.MILLISECONDS.convert(time, TimeUnit.MILLISECONDS) + " ms");
         progressBar.setVisible(false);
+        btnStop.setEnabled(false);
+        btnStop.setVisible(false);
         //
     }
 
@@ -66,6 +77,9 @@ public class StatusPanel extends JPanel implements ClusteringListener {
         lbStatus.setText("Clustering " + dataset.getName() + " with " + params.get("algorithm") + " ...");
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);
+        btnStop.setEnabled(true);
+        btnStop.setVisible(true);
+        startTime = System.currentTimeMillis();
         //
     }
 

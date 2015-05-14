@@ -107,7 +107,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogDescriptor dd = new DialogDescriptor(getUI(getAlgorithm()), "Settings");
+                DialogDescriptor dd = new DialogDescriptor(updateUI(getAlgorithm()), "Settings");
                 if (DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
                     updateAlgorithm();
 
@@ -143,7 +143,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         evaluator = ExternalEvaluatorFactory.getInstance().getProvider(validator);
     }
 
-    private JPanel getUI(ClusteringAlgorithm alg) {
+    private JPanel updateUI(ClusteringAlgorithm alg) {
         optPanel = null;
         for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {
             if (dlg.isUIfor(alg)) {
@@ -182,9 +182,8 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     }
 
     public Props getProps() {
-        if (optPanel == null) {
-            getUI(getAlgorithm());
-        }
+        updateUI(getAlgorithm());
+
         if (optPanel != null) {
             return optPanel.getParams();
         } else {

@@ -25,6 +25,7 @@ import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.demo.data.DataLoader;
 import org.clueminer.demo.gui.ScatterWrapper;
 import org.clueminer.demo.gui.SettingsPanel;
+import org.clueminer.demo.gui.StatusPanel;
 
 /**
  * Simple GUI for displaying clustering results
@@ -37,6 +38,7 @@ public class Demo2D extends BaseFrame {
 
     private ScatterWrapper plot;
     private SettingsPanel settings;
+    private StatusPanel status;
 
     public Demo2D() {
         initComponents();
@@ -84,6 +86,11 @@ public class Demo2D extends BaseFrame {
         settings = new SettingsPanel(plot);
         gbl.setConstraints(settings, c);
         add(settings, c);
+        //status bar
+        c.gridy = 2;
+        status = new StatusPanel();
+        plot.addClusteringListener(status);
+        add(status, c);
 
         c.fill = GridBagConstraints.BOTH;
         c.gridx = 0;

@@ -78,10 +78,12 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
         return dataset;
     }
 
+    @Override
     public final void setDataset(Dataset<? extends Instance> dataset) {
         this.dataset = dataset;
     }
 
+    @Override
     public void setProperties(Props props) {
         this.properties = props;
     }
@@ -109,6 +111,12 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
     public void fireClusteringChanged(Clustering clust) {
         for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
             listener.clusteringChanged(clust);
+        }
+    }
+
+    public void fireClusteringStarted(Dataset<? extends Instance> dataset, Props param) {
+        for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
+            listener.clusteringStarted(dataset, param);
         }
     }
 }

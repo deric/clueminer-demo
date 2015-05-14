@@ -23,7 +23,6 @@ import java.awt.Insets;
 import java.util.Map;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
-import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -82,16 +81,19 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
     }
 
 
+    @Override
     public void execute(final Props params) {
         if (algorithm == null) {
             throw new RuntimeException("no algorithm was set");
         }
+
         task = RP.create(new Runnable() {
 
             @Override
             public void run() {
                 System.out.println("algorithm: " + algorithm.getName());
-                params.put("name", getAlgorithm().getName());
+                params.put("algorithm", getAlgorithm().getName());
+                fireClusteringStarted(dataset, params);
                 System.out.println(params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
                 DistanceMeasure func = df.getProvider("Euclidean");
@@ -123,13 +125,4 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
         }
     }
 
-    public void addClusteringListener(ClusteringListener listener) {
-        clusteringListeners.add(ClusteringListener.class, listener);
-    }
-
-    public void fireClusteringChanged(Clustering clust) {
-        for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
-            listener.clusteringChanged(clust);
-        }
-    }
 }

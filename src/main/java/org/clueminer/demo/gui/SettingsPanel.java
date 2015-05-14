@@ -35,6 +35,8 @@ import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.factory.ExternalEvaluatorFactory;
 import org.clueminer.clustering.gui.ClusteringDialog;
 import org.clueminer.clustering.gui.ClusteringDialogFactory;
+import org.clueminer.dataset.api.Dataset;
+import org.clueminer.dataset.api.Instance;
 import org.clueminer.utils.Props;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
@@ -181,7 +183,6 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
 
     public Props getProps() {
         if (optPanel == null) {
-            System.out.println("alg: " + getAlgorithm());
             getUI(getAlgorithm());
         }
         if (optPanel != null) {
@@ -203,6 +204,11 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     @Override
     public void resultUpdate(HierarchicalResult hclust) {
         //not much to do
+    }
+
+    @Override
+    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+        //TODO: disable controls?
     }
 
 }

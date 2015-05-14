@@ -198,6 +198,10 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
             double score = evaluator.score(clust);
             lbValidation.setText(decimalFormat.format(score));
         }
+        algBox.setEnabled(true);
+        dataBox.setEnabled(true);
+        btnOptions.setEnabled(true);
+        validationBox.setEnabled(true);
     }
 
     @Override
@@ -208,6 +212,10 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     @Override
     public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
         //TODO: disable controls?
+        algBox.setEnabled(false);
+        dataBox.setEnabled(false);
+        btnOptions.setEnabled(false);
+        validationBox.setEnabled(false);
     }
 
 }

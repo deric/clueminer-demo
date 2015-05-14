@@ -82,8 +82,7 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
         if (algorithm == null) {
             throw new RuntimeException("no algorithm was set");
         }
-
-        task = RP.create(new Runnable() {
+        task = RP.post(new Runnable() {
 
             @Override
             public void run() {
@@ -103,7 +102,6 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
 
         });
         task.addTaskListener(this);
-        task.schedule(0);
     }
 
     @Override

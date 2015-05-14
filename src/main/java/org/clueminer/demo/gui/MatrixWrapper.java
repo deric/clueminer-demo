@@ -28,7 +28,6 @@ import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
 import org.clueminer.scatter.matrix.ScatterMatrixPanel;
 import org.clueminer.utils.Props;
-import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
 
 /**
@@ -38,8 +37,6 @@ import org.openide.util.TaskListener;
 public class MatrixWrapper extends AbstractClusteringViewer implements TaskListener, DatasetViewer {
 
     private ScatterMatrixPanel viewer;
-    private static final RequestProcessor RP = new RequestProcessor("Clustering");
-    private RequestProcessor.Task task;
     private Clustering<? extends Cluster> clust;
 
     public MatrixWrapper(DataProvider provider) {

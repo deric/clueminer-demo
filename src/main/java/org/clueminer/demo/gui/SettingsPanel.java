@@ -159,10 +159,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     }
 
     public void updateAlgorithm() {
-        ClusteringAlgorithm algorithm = getAlgorithm();
-        if (optPanel != null) {
-            optPanel.updateAlgorithm(algorithm);
-        }
+        updateUI(getAlgorithm());
     }
 
     public final void setDatasets(String[] datasets) {

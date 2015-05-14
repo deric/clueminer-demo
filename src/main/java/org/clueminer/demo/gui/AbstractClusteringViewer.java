@@ -45,7 +45,7 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
     protected Executor exec;
     protected ColorGenerator cg;
     protected final transient EventListenerList clusteringListeners = new EventListenerList();
-    protected static final RequestProcessor RP = new RequestProcessor("Clustering");
+    protected static RequestProcessor RP = new RequestProcessor("Clustering");
     protected RequestProcessor.Task task;
 
     public AbstractClusteringViewer(DataProvider provider) {
@@ -127,7 +127,10 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
     @Override
     public void abort() {
         if (task != null) {
-            task.cancel();
+            //it's hard to remove running task, we have to perform complete shutdown
+            RP.shutdown();
+            //replace request processor
+            RP = new RequestProcessor("Clustering");
         }
         //no result yet
         fireClusteringChanged(null);

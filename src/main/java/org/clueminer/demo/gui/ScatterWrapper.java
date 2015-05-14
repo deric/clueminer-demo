@@ -91,7 +91,6 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
 
             @Override
             public void run() {
-                System.out.println("algorithm: " + algorithm.getName());
                 params.put("algorithm", getAlgorithm().getName());
                 fireClusteringStarted(dataset, params);
                 System.out.println(params.toString());

@@ -20,12 +20,15 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.clueminer.demo.gui.StatusPanel;
 
 /**
  *
  * @author deric
  */
 public class BaseFrame extends JPanel {
+
+    protected StatusPanel status;
 
     public String getTitle() {
         return "Clustering demo";

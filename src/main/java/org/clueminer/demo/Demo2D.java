@@ -38,7 +38,7 @@ public class Demo2D extends BaseFrame {
 
     private ScatterWrapper plot;
     private SettingsPanel settings;
-    private StatusPanel status;
+
 
     public Demo2D() {
         initComponents();

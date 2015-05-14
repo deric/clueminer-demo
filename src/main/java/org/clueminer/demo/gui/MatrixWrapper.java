@@ -84,8 +84,8 @@ public class MatrixWrapper extends AbstractClusteringViewer implements TaskListe
 
             @Override
             public void run() {
-                System.out.println("algorithm: " + algorithm.getName());
-                params.put("name", getAlgorithm().getName());
+                params.put("algorithm", getAlgorithm().getName());
+                fireClusteringStarted(dataset, params);
                 System.out.println(params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
                 DistanceMeasure func = df.getProvider("Euclidean");

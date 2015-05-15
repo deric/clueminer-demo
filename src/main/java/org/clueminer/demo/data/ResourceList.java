@@ -35,6 +35,8 @@ import java.util.zip.ZipFile;
  */
 public class ResourceList {
 
+    private static final String OS = System.getProperty("os.name").toLowerCase();
+
     /**
      * for all elements of java.class.path get a Collection of resources Pattern
      * pattern = Pattern.compile(".*"); gets all resources
@@ -45,7 +47,13 @@ public class ResourceList {
     public static Collection<String> getResources(final Pattern pattern) {
         final List<String> retval = new LinkedList<>();
         final String classPath = System.getProperty("java.class.path", ".");
-        final String[] classPathElements = classPath.split(":");
+        String pathSeparator;
+        if (isWindows()) {
+            pathSeparator = ";";
+        } else {
+            pathSeparator = ":";
+        }
+        final String[] classPathElements = classPath.split(pathSeparator);
         for (final String element : classPathElements) {
             retval.addAll(getResources(element, pattern));
         }
@@ -116,6 +124,22 @@ public class ResourceList {
             }
         }
         return retval;
+    }
+
+    public static boolean isWindows() {
+        return (OS.contains("win"));
+    }
+
+    public static boolean isMac() {
+        return (OS.contains("mac"));
+    }
+
+    public static boolean isUnix() {
+        return (OS.contains("nix") || OS.contains("nux") || OS.contains("aix"));
+    }
+
+    public static boolean isSolaris() {
+        return (OS.contains("sunos"));
     }
 
 }

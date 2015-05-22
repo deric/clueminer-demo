@@ -77,12 +77,13 @@ public class StatusPanel extends JPanel implements ClusteringListener {
         if (clust != null) {
             StringBuilder sb = new StringBuilder();
             sb.append("Clustering took ").append(TimeUnit.MILLISECONDS.convert(time, TimeUnit.MILLISECONDS))
-                    .append(" ms, ");
+                    .append(" ms");
             Dataset<? extends Instance> dataset = clust.getLookup().lookup(Dataset.class);
             if (dataset != null) {
-                sb.append(" dataset size: ").append(dataset.size()).append(" x ")
+                sb.append(", dataset size: ").append(dataset.size()).append(" x ")
                         .append(dataset.attributeCount());
             }
+            sb.append(", total clusters: ").append(clust.size());
 
             lbStatus.setText(sb.toString());
         } else {

@@ -68,6 +68,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         optPanels = new HashMap<>();
         panel.addClusteringListener(this);
         initComponents();
+        algBox.setSelectedItem("k-means (MacQueen)");
         setDatasets(panel.getDatasets());
 
     }

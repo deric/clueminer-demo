@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.clueminer.dataset.api.DataProvider;
@@ -71,7 +72,11 @@ public class DataLoader implements DataProvider {
 
     @Override
     public Dataset<? extends Instance> first() {
-        return getDataset(datasets.keySet().iterator().next());
+        Iterator<String> it = datasets.keySet().iterator();
+        if (!it.hasNext()) {
+            throw new RuntimeException("no datasets were loaded");
+        }
+        return getDataset(it.next());
     }
 
     @Override

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
@@ -150,7 +151,7 @@ public class DataLoader implements DataProvider {
     }
 
     public static DataProvider createLoader(String path) {
-        Map<String, String> datasets = new HashMap<>();
+        Map<String, String> datasets = new TreeMap<>();
 
         Pattern pattern = Pattern.compile("(.*)" + path + "(.*)");
 

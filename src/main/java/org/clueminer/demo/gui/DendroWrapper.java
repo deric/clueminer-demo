@@ -40,9 +40,10 @@ public class DendroWrapper extends JPanel implements ClusteringListener {
 
     private DgViewer viewer;
 
-    public DendroWrapper(DatasetViewer panel) {
+    public DendroWrapper(DatasetViewer panel, StatusPanel status) {
         initComponets();
         viewer.addClusteringListener(panel);
+        viewer.addClusteringListener(status);
     }
 
     private void initComponets() {

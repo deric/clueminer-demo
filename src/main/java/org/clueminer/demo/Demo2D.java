@@ -103,7 +103,7 @@ public class Demo2D extends BaseFrame {
         c.weighty = 8.0;
         if (showDendro) {
             c.weightx = 0.5;
-            dendro = new DendroWrapper(plot);
+            dendro = new DendroWrapper(plot, status);
             plot.addClusteringListener(dendro);
             c.gridx = 1;
             add(dendro, c);

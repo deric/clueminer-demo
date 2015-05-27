@@ -24,13 +24,13 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.clueminer.clustering.api.ClusterEvaluation;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
 import org.clueminer.clustering.api.ClusteringListener;
-import org.clueminer.clustering.api.ExternalEvaluator;
 import org.clueminer.clustering.api.HierarchicalResult;
-import org.clueminer.clustering.api.factory.ExternalEvaluatorFactory;
+import org.clueminer.clustering.api.factory.EvaluationFactory;
 import org.clueminer.clustering.gui.ClusteringDialog;
 import org.clueminer.clustering.gui.ClusteringDialogFactory;
 import org.clueminer.dataset.api.Dataset;
@@ -55,9 +55,9 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     private JComboBox validationBox;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
-    private ExternalEvaluator evaluator;
+    private ClusterEvaluation evaluator;
     private final HashMap<ClusteringAlgorithm, JPanel> optPanels;
-    private StatusPanel status;
+    private final StatusPanel status;
 
     public SettingsPanel(DatasetViewer panel, StatusPanel status) {
         this.panel = panel;
@@ -115,7 +115,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         });
         add(btnOptions);
 
-        validationBox = new JComboBox(ExternalEvaluatorFactory.getInstance().getProvidersArray());
+        validationBox = new JComboBox(EvaluationFactory.getInstance().getProvidersArray());
         validationBox.setSelectedItem("NMI");
         updateEvaluator("NMI");
         validationBox.addActionListener(new ActionListener() {
@@ -136,7 +136,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     }
 
     private void updateEvaluator(String validator) {
-        evaluator = ExternalEvaluatorFactory.getInstance().getProvider(validator);
+        evaluator = EvaluationFactory.getInstance().getProvider(validator);
     }
 
     private JPanel updateUI(ClusteringAlgorithm alg) {

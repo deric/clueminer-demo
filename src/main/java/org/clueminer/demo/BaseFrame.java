@@ -28,6 +28,8 @@ import org.clueminer.demo.gui.StatusPanel;
  */
 public class BaseFrame extends JPanel {
 
+    private static final long serialVersionUID = 3826372961476533745L;
+
     protected StatusPanel status;
 
     public String getTitle() {

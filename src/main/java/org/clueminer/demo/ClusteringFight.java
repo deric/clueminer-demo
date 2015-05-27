@@ -43,7 +43,9 @@ import org.openide.util.RequestProcessor;
  * @author deric
  */
 public class ClusteringFight extends JFrame {
+
     private static final RequestProcessor RP = new RequestProcessor("non-interruptible tasks", 1, false);
+    private static final long serialVersionUID = -6891327419249057159L;
     private DendroPanel panel1;
     private DendroPanel panel2;
 

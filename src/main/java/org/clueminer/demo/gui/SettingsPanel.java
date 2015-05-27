@@ -19,13 +19,11 @@ package org.clueminer.demo.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
@@ -57,15 +55,14 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     private JComboBox validationBox;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
-    private JLabel lbValidation;
     private ExternalEvaluator evaluator;
-    private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00");
-    private Clustering<? extends Cluster> clustering;
     private final HashMap<ClusteringAlgorithm, JPanel> optPanels;
+    private StatusPanel status;
 
-    public SettingsPanel(DatasetViewer panel) {
+    public SettingsPanel(DatasetViewer panel, StatusPanel status) {
         this.panel = panel;
         optPanels = new HashMap<>();
+        this.status = status;
         panel.addClusteringListener(this);
         initComponents();
         algBox.setSelectedItem("k-means (MacQueen)");
@@ -128,15 +125,13 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
                 String validator = (String) validationBox.getSelectedItem();
                 if (!validator.equals(evaluator.getName())) {
                     updateEvaluator(validator);
-                    clusteringChanged(clustering);
+                    status.setEvaluator(evaluator);
                 }
             }
         });
 
         add(new JLabel("Validation:"));
 
-        lbValidation = new JLabel("");
-        add(lbValidation);
         add(validationBox);
     }
 
@@ -191,11 +186,6 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
 
     @Override
     public void clusteringChanged(Clustering clust) {
-        if (clust != null && evaluator != null) {
-            clustering = clust;
-            double score = evaluator.score(clust);
-            lbValidation.setText(decimalFormat.format(score));
-        }
         algBox.setEnabled(true);
         dataBox.setEnabled(true);
         btnOptions.setEnabled(true);

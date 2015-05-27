@@ -39,6 +39,8 @@ import org.openide.util.TaskListener;
  */
 public class MatrixWrapper extends AbstractClusteringViewer implements TaskListener, DatasetViewer {
 
+    private static final long serialVersionUID = -3003232461051594623L;
+
     private ScatterMatrixPanel viewer;
     private Clustering<? extends Cluster> clust;
 

@@ -85,12 +85,13 @@ public class Demo2D extends BaseFrame {
         c.gridwidth = 1;
         c.weightx = c.weighty = 0.2; //no fill while resize
 
-        settings = new SettingsPanel(plot);
+        status = new StatusPanel(plot);
+        settings = new SettingsPanel(plot, status);
         gbl.setConstraints(settings, c);
         add(settings, c);
         //status bar
         c.gridy = 2;
-        status = new StatusPanel(plot);
+
         add(status, c);
 
         c.fill = GridBagConstraints.BOTH;

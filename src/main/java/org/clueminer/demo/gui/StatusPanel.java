@@ -19,16 +19,20 @@ package org.clueminer.demo.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import org.clueminer.clustering.api.Cluster;
+import org.clueminer.clustering.api.ClusterEvaluation;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.eval.external.NMIsum;
 import org.clueminer.utils.Props;
 
 /**
@@ -37,14 +41,20 @@ import org.clueminer.utils.Props;
  */
 public class StatusPanel extends JPanel implements ClusteringListener {
 
+    private static final long serialVersionUID = -2919926609337848228L;
+
     private JProgressBar progressBar;
     private JLabel lbStatus;
     private JButton btnStop;
     private long startTime;
     private final DatasetViewer plot;
+    private ClusterEvaluation evaluator;
+    private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00");
+    private Clustering<? extends Cluster> clustering;
 
     public StatusPanel(DatasetViewer plot) {
         this.plot = plot;
+        evaluator = new NMIsum();
         initComponents();
     }
 
@@ -73,6 +83,7 @@ public class StatusPanel extends JPanel implements ClusteringListener {
 
     @Override
     public void clusteringChanged(Clustering clust) {
+
         long time = System.currentTimeMillis() - startTime;
         if (clust != null) {
             StringBuilder sb = new StringBuilder();
@@ -84,15 +95,19 @@ public class StatusPanel extends JPanel implements ClusteringListener {
                         .append(dataset.attributeCount());
             }
             sb.append(", total clusters: ").append(clust.size());
+            double score = evaluator.score(clust);
+            sb.append(", ").append(evaluator.getName()).append(": ").append(decimalFormat.format(score));
 
             lbStatus.setText(sb.toString());
         } else {
             lbStatus.setText("Clustering stopped.");
         }
+
         progressBar.setVisible(false);
         btnStop.setEnabled(false);
         btnStop.setVisible(false);
         //
+        this.clustering = clust;
     }
 
     @Override
@@ -109,6 +124,11 @@ public class StatusPanel extends JPanel implements ClusteringListener {
         btnStop.setVisible(true);
         startTime = System.currentTimeMillis();
         //
+    }
+
+    public void setEvaluator(ClusterEvaluation evaluator) {
+        this.evaluator = evaluator;
+        clusteringChanged(clustering);
     }
 
 }

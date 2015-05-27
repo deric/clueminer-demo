@@ -36,6 +36,8 @@ import org.clueminer.utils.Props;
  */
 public class DendroWrapper extends JPanel implements ClusteringListener {
 
+    private static final long serialVersionUID = -6978699943366111216L;
+
     private DgViewer viewer;
 
     public DendroWrapper(DatasetViewer panel) {
@@ -84,6 +86,12 @@ public class DendroWrapper extends JPanel implements ClusteringListener {
     public void resultUpdate(HierarchicalResult hclust) {
         if (hclust != null) {
             viewer.setDataset(hclust.getDendrogramMapping());
+        }
+    }
+
+    public void addClusteringListener(ClusteringListener listener) {
+        if (viewer != null) {
+            viewer.addClusteringListener(listener);
         }
     }
 

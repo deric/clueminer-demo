@@ -20,7 +20,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.io.File;
 import javax.swing.SwingUtilities;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.demo.data.DataLoader;
@@ -66,7 +65,7 @@ public class Demo2D extends BaseFrame {
      * @return
      */
     private DataProvider loadDatasets() {
-        return DataLoader.createLoader("datasets" + File.separatorChar + "artificial");
+        return DataLoader.createLoader("datasets", "artificial");
     }
 
     private void initComponents() {

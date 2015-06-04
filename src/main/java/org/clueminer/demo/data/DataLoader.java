@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -43,13 +42,15 @@ import org.openide.util.Exceptions;
 public class DataLoader implements DataProvider {
 
     private final Map<String, String> datasets;
+    private final Map<String, String> fullPaths;
     private final Map<String, Dataset<? extends Instance>> cache;
     private String prefix = "datasets" + File.separatorChar + "artificial";
 
-    public DataLoader(Map<String, String> datasets, String prefix) {
+    public DataLoader(Map<String, String> datasets, String prefix, Map<String, String> fullPaths) {
         this.datasets = datasets;
         this.cache = new HashMap<>(datasets.size());
         this.prefix = prefix;
+        this.fullPaths = fullPaths;
     }
 
     @Override
@@ -66,7 +67,7 @@ public class DataLoader implements DataProvider {
             throw new RuntimeException("unknown dataset " + name);
         }
 
-        Dataset<? extends Instance> dataset = loadDataset(name, datasets.get(name));
+        Dataset<? extends Instance> dataset = loadDataset(name, datasets.get(name), fullPaths.get(name));
         cache.put(name, dataset);
         return dataset;
     }
@@ -92,7 +93,7 @@ public class DataLoader implements DataProvider {
      * @param name
      * @return
      */
-    private Dataset<? extends Instance> loadDataset(String name, String type) {
+    private Dataset<? extends Instance> loadDataset(String name, String type, String fullPath) {
         Dataset<? extends Instance> dataset = null;
         switch (type) {
             case "arff":
@@ -101,11 +102,10 @@ public class DataLoader implements DataProvider {
                 dataset.setName(name);
                 ARFFHandler arff = new ARFFHandler();
                 try {
-                    arff.load(resource(name + "." + type), dataset);
+                    arff.load(resource(name + "." + type, fullPath), dataset);
                 } catch (FileNotFoundException ex) {
                     Exceptions.printStackTrace(ex);
                 }
-
                 break;
             default:
                 throw new RuntimeException("unsupported format " + type);
@@ -119,14 +119,16 @@ public class DataLoader implements DataProvider {
      * a .tmp file which should be on exit deleted
      *
      * @param path
+     * @param fullPath
      * @return
      */
-    public File resource(String path) {
-        String resource = File.separatorChar + prefix + File.separatorChar + path;
+    public File resource(String path, String fullPath) {
+        String resource = prefix + File.separatorChar + path;
         File file = null;
         URL url = DataLoader.class.getResource(resource);
         if (url == null) {
-            throw new RuntimeException("resource not found: " + path);
+            //probably on Windows
+            return new File(fullPath);
         }
 
         if (url.toString().startsWith("jar:")) {
@@ -150,12 +152,12 @@ public class DataLoader implements DataProvider {
         return file;
     }
 
-    public static DataProvider createLoader(String path) {
+    public static DataProvider createLoader(String p1, String p2) {
+        String path = p1 + File.pathSeparatorChar + p2;
         Map<String, String> datasets = new TreeMap<>();
+        Map<String, String> paths = new HashMap<>();
 
-        Pattern pattern = Pattern.compile("(.*)" + path + "(.*)");
-
-        final Collection<String> list = ResourceList.getResources(pattern);
+        final Collection<String> list = ResourceList.getResources(p1, p2);
         int idx, dot;
         String dataset;
         String ext;
@@ -165,9 +167,10 @@ public class DataLoader implements DataProvider {
             dataset = name.substring(idx + 1, dot);
             ext = name.substring(dot + 1);
             datasets.put(dataset, ext);
+            paths.put(dataset, name);
         }
 
-        return new DataLoader(datasets, path);
+        return new DataLoader(datasets, path, paths);
     }
 
 }

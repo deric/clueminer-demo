@@ -20,13 +20,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.openide.util.Exceptions;
+import org.openide.util.Utilities;
 
 /**
  * code from
@@ -41,16 +45,33 @@ public class ResourceList {
      * for all elements of java.class.path get a Collection of resources Pattern
      * pattern = Pattern.compile(".*"); gets all resources
      *
-     * @param pattern the pattern to match
+     * @param p1 first part of path
+     * @param p2 second part of path
      * @return the resources in the order they are found
      */
-    public static Collection<String> getResources(final Pattern pattern) {
+    public static Collection<String> getResources(String p1, String p2) {
         final List<String> retval = new LinkedList<>();
         final String classPath = System.getProperty("java.class.path", ".");
         String pathSeparator;
+        Pattern pattern;
         if (isWindows()) {
+            pattern = Pattern.compile("(.*)" + p1 + "(.)" + p2 + "(.*)");
+            try {
+                Enumeration<URL> en = ResourceList.class.getClassLoader().getResources("datasets");
+                if (en.hasMoreElements()) {
+                    URL metaInf = en.nextElement();
+                    File fileMetaInf = Utilities.toFile(metaInf.toURI());
+                    browseFiles(retval, fileMetaInf, pattern);
+                }
+            } catch (IOException | URISyntaxException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            if (retval.size() > 0) {
+                return retval;
+            }
             pathSeparator = ";";
         } else {
+            pattern = Pattern.compile("(.*)" + p1 + File.separatorChar + p2 + "(.*)");
             pathSeparator = ":";
         }
         final String[] classPathElements = classPath.split(pathSeparator);
@@ -58,6 +79,21 @@ public class ResourceList {
             retval.addAll(getResources(element, pattern));
         }
         return retval;
+    }
+
+    private static void browseFiles(final List<String> retval, File fileMetaInf, final Pattern pattern) {
+        File[] files = fileMetaInf.listFiles();
+        for (File f : files) {
+            if (f.isDirectory()) {
+                browseFiles(retval, f, pattern);
+            } else {
+                String fileName = f.getAbsolutePath();
+                final boolean accept = pattern.matcher(fileName).matches();
+                if (accept) {
+                    retval.add(fileName);
+                }
+            }
+        }
     }
 
     private static Collection<String> getResources(final String element, final Pattern pattern) {

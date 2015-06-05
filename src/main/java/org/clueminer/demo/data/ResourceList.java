@@ -22,10 +22,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -53,9 +56,9 @@ public class ResourceList {
         final List<String> retval = new LinkedList<>();
         final String classPath = System.getProperty("java.class.path", ".");
         String pathSeparator;
-        Pattern pattern;
+        //platform independent regexp
+        Pattern pattern = Pattern.compile("(.*)" + p1 + "(.)" + p2 + "(.*)");
         if (isWindows()) {
-            pattern = Pattern.compile("(.*)" + p1 + "(.)" + p2 + "(.*)");
             try {
                 Enumeration<URL> en = ResourceList.class.getClassLoader().getResources("datasets");
                 if (en.hasMoreElements()) {
@@ -71,12 +74,16 @@ public class ResourceList {
             }
             pathSeparator = ";";
         } else {
-            pattern = Pattern.compile("(.*)" + p1 + File.separatorChar + p2 + "(.*)");
             pathSeparator = ":";
         }
+        //when running from IDE we can use classpath a directly read files from disk
         final String[] classPathElements = classPath.split(pathSeparator);
         for (final String element : classPathElements) {
             retval.addAll(getResources(element, pattern));
+        }
+        if (retval.isEmpty()) {
+            //last resort, when compiled into JAR
+            loadFromJar(retval, pattern);
         }
         return retval;
     }
@@ -111,8 +118,7 @@ public class ResourceList {
         return retval;
     }
 
-    private static Collection<String> getResourcesFromJarFile(final File file,
-            final Pattern pattern) {
+    private static Collection<String> getResourcesFromJarFile(final File file, final Pattern pattern) {
         final List<String> retval = new LinkedList<>();
         ZipInputStream zip = null;
         try {
@@ -178,6 +184,46 @@ public class ResourceList {
 
     public static boolean isSolaris() {
         return (OS.contains("sunos"));
+    }
+
+    /**
+     * List resources from compiled JAR and choose those matching some pattern
+     *
+     * @param retval
+     * @param pattern
+     */
+    private static void loadFromJar(List<String> retval, Pattern pattern) {
+        try {
+            Enumeration<URL> en = ResourceList.class.getClassLoader().getResources("datasets");
+            if (en.hasMoreElements()) {
+                URL metaInf = en.nextElement();
+                File file;
+
+                String path = metaInf.getPath();
+                String jarFilePath = path.substring(path.indexOf(":") + 1, path.indexOf("!"));
+                jarFilePath = URLDecoder.decode(jarFilePath, "UTF-8");
+                file = new File(jarFilePath);
+
+                try (JarFile jar = new JarFile(file)) {
+                    JarEntry entry;
+                    String fileName;
+                    Enumeration<JarEntry> enumer = jar.entries();
+                    while (enumer.hasMoreElements()) {
+                        entry = enumer.nextElement();
+                        fileName = entry.getName();
+                        if (pattern.matcher(fileName).matches()) {
+                            //don't add directories
+                            if (!fileName.endsWith("/")) {
+                                retval.add("jar:" + jarFilePath + "!" + fileName);
+                            }
+                        }
+                    }
+
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
 }

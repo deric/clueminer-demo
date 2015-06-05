@@ -124,30 +124,51 @@ public class DataLoader implements DataProvider {
      */
     public File resource(String path, String fullPath) {
         String resource = prefix + File.separatorChar + path;
-        File file = null;
+        File file;
         URL url = DataLoader.class.getResource(resource);
         if (url == null) {
             //probably on Windows
-            return new File(fullPath);
+            file = new File(fullPath);
+            if (file.exists()) {
+                return file;
+            }
+            //non existing URL
+            //no classpath, compiled as JAR
+            //if path is in form: "jar:path.jar!resource/data.arff"
+            int pos = fullPath.lastIndexOf("!");
+            if (pos > 0) {
+                resource = fullPath.substring(pos + 1);
+                if (!resource.startsWith("/")) {
+                    //necessary for loading as a stream
+                    resource = "/" + resource;
+                }
+            }
+            return loadResource(resource);
         }
 
         if (url.toString().startsWith("jar:")) {
-            try {
-                InputStream input = getClass().getResourceAsStream(resource);
-                file = File.createTempFile("nodesfile", ".tmp");
-                OutputStream out = new FileOutputStream(file);
-                int read;
-                byte[] bytes = new byte[1024];
-
-                while ((read = input.read(bytes)) != -1) {
-                    out.write(bytes, 0, read);
-                }
-                file.deleteOnExit();
-            } catch (IOException ex) {
-                System.err.println(ex.toString());
-            }
+            return loadResource(resource);
         } else {
             file = new File(url.getFile());
+        }
+        return file;
+    }
+
+    private File loadResource(String resource) {
+        File file = null;
+        try {
+            InputStream input = getClass().getResourceAsStream(resource);
+            file = File.createTempFile("nodesfile", ".tmp");
+            OutputStream out = new FileOutputStream(file);
+            int read;
+            byte[] bytes = new byte[1024];
+
+            while ((read = input.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
+            }
+            file.deleteOnExit();
+        } catch (IOException ex) {
+            System.err.println(ex.toString());
         }
         return file;
     }
@@ -164,7 +185,11 @@ public class DataLoader implements DataProvider {
         for (final String name : list) {
             idx = name.lastIndexOf(File.separatorChar);
             dot = name.lastIndexOf(".");
-            dataset = name.substring(idx + 1, dot);
+            if (dot > 0) {
+                dataset = name.substring(idx + 1, dot);
+            } else {
+                dataset = name;
+            }
             ext = name.substring(dot + 1);
             datasets.put(dataset, ext);
             paths.put(dataset, name);

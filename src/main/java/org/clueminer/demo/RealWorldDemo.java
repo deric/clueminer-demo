@@ -22,7 +22,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.SwingUtilities;
 import org.clueminer.dataset.api.DataProvider;
-import org.clueminer.demo.data.DataLoader;
+import org.clueminer.data.DataLoader;
 import org.clueminer.demo.gui.MatrixWrapper;
 import org.clueminer.demo.gui.SettingsPanel;
 import org.clueminer.demo.gui.StatusPanel;

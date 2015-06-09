@@ -13,13 +13,17 @@ directory structure:
 ```
 clueminer/
 clueminer-demo/
+clustering-benchmark/
 ```
 
 that means following sequence of commands:
 ```
 git clone https://github.com/deric/clueminer.git
 git clone https://github.com/deric/clueminer-demo.git
-cd clueminer-demo
+git clone https://github.com/deric/clustering-benchmark.git
+cd clustering-benchmark
+mvn install
+cd ../clueminer-demo
 mvn install
 ```
 and run compiled JAR. Note that dependent libraries will be placed in `targer/libs`.

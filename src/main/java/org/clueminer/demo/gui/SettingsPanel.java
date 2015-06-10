@@ -116,8 +116,8 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         add(btnOptions);
 
         validationBox = new JComboBox(EvaluationFactory.getInstance().getProvidersArray());
-        validationBox.setSelectedItem("NMI");
-        updateEvaluator("NMI");
+        validationBox.setSelectedItem("NMI-sqrt");
+        updateEvaluator("NMI-sqrt");
         validationBox.addActionListener(new ActionListener() {
 
             @Override

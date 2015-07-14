@@ -32,14 +32,14 @@ import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
-import org.clueminer.eval.external.NMIsum;
+import org.clueminer.eval.external.NMIsqrt;
 import org.clueminer.utils.Props;
 
 /**
  *
  * @author deric
  */
-public class StatusPanel extends JPanel implements ClusteringListener {
+public class StatusPanel extends JPanel implements ClusteringListener, ClusteringGuiListener {
 
     private static final long serialVersionUID = -2919926609337848228L;
 
@@ -51,10 +51,12 @@ public class StatusPanel extends JPanel implements ClusteringListener {
     private ClusterEvaluation evaluator;
     private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00");
     private Clustering<? extends Cluster> clustering;
+    private double scoreSum;
+    private int repeatCnt;
 
     public StatusPanel(DatasetViewer plot) {
         this.plot = plot;
-        evaluator = new NMIsum();
+        evaluator = new NMIsqrt();
         initComponents();
     }
 
@@ -86,6 +88,7 @@ public class StatusPanel extends JPanel implements ClusteringListener {
 
         long time = System.currentTimeMillis() - startTime;
         if (clust != null) {
+            repeatCnt += 1;
             StringBuilder sb = new StringBuilder();
             sb.append("Clustering took ").append(TimeUnit.MILLISECONDS.convert(time, TimeUnit.MILLISECONDS))
                     .append(" ms");
@@ -96,7 +99,10 @@ public class StatusPanel extends JPanel implements ClusteringListener {
             }
             sb.append(", total clusters: ").append(clust.size());
             double score = evaluator.score(clust);
+            System.out.println(evaluator.getName() + ": " + score);
+            scoreSum += score;
             sb.append(", ").append(evaluator.getName()).append(": ").append(decimalFormat.format(score));
+            sb.append(", ").append("avg").append(": ").append(decimalFormat.format(scoreSum / repeatCnt));
 
             lbStatus.setText(sb.toString());
         } else {
@@ -129,6 +135,12 @@ public class StatusPanel extends JPanel implements ClusteringListener {
     public void setEvaluator(ClusterEvaluation evaluator) {
         this.evaluator = evaluator;
         clusteringChanged(clustering);
+    }
+
+    @Override
+    public void batchStarted(Dataset<? extends Instance> dataset, Props params) {
+        repeatCnt = 0;
+        scoreSum = 0.0;
     }
 
 }

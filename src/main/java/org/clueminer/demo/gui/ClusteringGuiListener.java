@@ -16,9 +16,7 @@
  */
 package org.clueminer.demo.gui;
 
-import org.clueminer.clustering.api.Clustering;
-import org.clueminer.clustering.api.ClusteringAlgorithm;
-import org.clueminer.clustering.api.ClusteringListener;
+import java.util.EventListener;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.utils.Props;
@@ -27,38 +25,13 @@ import org.clueminer.utils.Props;
  *
  * @author deric
  */
-public interface DatasetViewer extends ClusteringListener {
-
-    void addClusteringListener(ClusteringListener listener);
-
-    void fireClusteringChanged(Clustering clust);
-
-    Dataset<? extends Instance> getDataset();
-
-    void setDataset(Dataset<? extends Instance> dataset);
+public interface ClusteringGuiListener extends EventListener {
 
     /**
-     * Start clustering
+     * Triggered when set of repeated runs starts
      *
+     * @param dataset
      * @param params
      */
-    void execute(final Props params);
-
-    /**
-     * Abort current clustering, if any
-     */
-    void abort();
-
-    void setAlgorithm(ClusteringAlgorithm alg);
-
-    ClusteringAlgorithm getAlgorithm();
-
-    void setProperties(Props props);
-
-    void dataChanged(String datasetName);
-
-    String[] getDatasets();
-
-    void fireBatchStarted(Dataset<? extends Instance> dataset, Props props);
-
+    void batchStarted(Dataset<? extends Instance> dataset, Props params);
 }

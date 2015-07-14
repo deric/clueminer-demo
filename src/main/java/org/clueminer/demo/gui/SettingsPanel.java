@@ -24,6 +24,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import org.clueminer.clustering.api.ClusterEvaluation;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
@@ -53,6 +55,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     private ClusteringFactory cf;
     private JComboBox algBox;
     private JComboBox validationBox;
+    private JSpinner spinRepeat;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
     private ClusterEvaluation evaluator;
@@ -79,7 +82,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 panel.dataChanged((String) dataBox.getSelectedItem());
-                panel.execute(getProps());
+                execute();
             }
         });
         add(dataBox);
@@ -94,7 +97,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
                 //if algorithm was really changed, trigger execution
                 if (!alg.equals(panel.getAlgorithm().getName())) {
                     panel.setAlgorithm(cf.getProvider(alg));
-                    panel.execute(getProps());
+                    execute();
                 }
             }
         });
@@ -108,8 +111,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
                 DialogDescriptor dd = new DialogDescriptor(updateUI(getAlgorithm()), "Settings");
                 if (DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
                     updateAlgorithm();
-
-                    panel.execute(getProps());
+                    execute();
                 }
             }
         });
@@ -131,8 +133,24 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         });
 
         add(new JLabel("Validation:"));
-
         add(validationBox);
+
+        add(new JLabel("Repeat:"));
+        spinRepeat = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
+        add(spinRepeat);
+    }
+
+    private void execute() {
+        int i = 0;
+        int repeat = (int) spinRepeat.getValue();
+        Props p = getProps();
+        if (repeat > 1) {
+            panel.fireBatchStarted(panel.getDataset(), p);
+        }
+        while (i < repeat) {
+            panel.execute(p);
+            i++;
+        }
     }
 
     private void updateEvaluator(String validator) {

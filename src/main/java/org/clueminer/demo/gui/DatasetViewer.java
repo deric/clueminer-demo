@@ -59,6 +59,4 @@ public interface DatasetViewer extends ClusteringListener {
 
     String[] getDatasets();
 
-    void fireBatchStarted(Dataset<? extends Instance> dataset, Props props);
-
 }

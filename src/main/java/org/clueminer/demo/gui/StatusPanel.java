@@ -39,7 +39,7 @@ import org.clueminer.utils.Props;
  *
  * @author deric
  */
-public class StatusPanel extends JPanel implements ClusteringListener, ClusteringGuiListener {
+public class StatusPanel extends JPanel implements ClusteringListener, ControlListener {
 
     private static final long serialVersionUID = -2919926609337848228L;
 
@@ -96,13 +96,16 @@ public class StatusPanel extends JPanel implements ClusteringListener, Clusterin
             if (dataset != null) {
                 sb.append(", dataset size: ").append(dataset.size()).append(" x ")
                         .append(dataset.attributeCount());
+                sb.append(", classes: ").append(dataset.getClasses().size());
             }
             sb.append(", total clusters: ").append(clust.size());
             double score = evaluator.score(clust);
-            System.out.println(evaluator.getName() + ": " + score);
+            System.out.println(evaluator.getName() + ": " + score + " [" + repeatCnt + "]");
             scoreSum += score;
             sb.append(", ").append(evaluator.getName()).append(": ").append(decimalFormat.format(score));
-            sb.append(", ").append("avg").append(": ").append(decimalFormat.format(scoreSum / repeatCnt));
+            double avg = scoreSum / (double) repeatCnt;
+            System.out.println("avg = " + avg);
+            sb.append(", ").append("avg").append(": ").append(decimalFormat.format(avg));
 
             lbStatus.setText(sb.toString());
         } else {
@@ -139,6 +142,7 @@ public class StatusPanel extends JPanel implements ClusteringListener, Clusterin
 
     @Override
     public void batchStarted(Dataset<? extends Instance> dataset, Props params) {
+        System.out.println("reset batch sum");
         repeatCnt = 0;
         scoreSum = 0.0;
     }

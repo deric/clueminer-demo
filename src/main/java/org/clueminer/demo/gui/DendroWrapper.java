@@ -47,7 +47,7 @@ public class DendroWrapper extends JPanel implements ClusteringListener {
         initComponets();
         viewer.addClusteringListener(panel);
         viewer.addClusteringListener(status);
-        guiListeners.add(ClusteringGuiListener.class, status);
+        guiListeners.add(ControlListener.class, status);
     }
 
     private void initComponets() {
@@ -101,10 +101,10 @@ public class DendroWrapper extends JPanel implements ClusteringListener {
     }
 
     public void fireBatchStarted(Dataset<? extends Instance> dataset, Props params) {
-        ClusteringGuiListener[] listeners;
+        ControlListener[] listeners;
 
-        listeners = guiListeners.getListeners(ClusteringGuiListener.class);
-        for (ClusteringGuiListener listener : listeners) {
+        listeners = guiListeners.getListeners(ControlListener.class);
+        for (ControlListener listener : listeners) {
             listener.batchStarted(dataset, params);
         }
     }

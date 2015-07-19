@@ -139,11 +139,4 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
         fireClusteringChanged(null);
     }
 
-    @Override
-    public void fireBatchStarted(Dataset<? extends Instance> dataset, Props param) {
-        for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
-            listener.clusteringStarted(dataset, param);
-        }
-    }
-
 }

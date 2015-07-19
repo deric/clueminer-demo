@@ -26,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.api.ClusterEvaluation;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
@@ -61,12 +62,14 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     private ClusterEvaluation evaluator;
     private final HashMap<ClusteringAlgorithm, JPanel> optPanels;
     private final StatusPanel status;
+    protected final transient EventListenerList controlListeners = new EventListenerList();
 
     public SettingsPanel(DatasetViewer panel, StatusPanel status) {
         this.panel = panel;
         optPanels = new HashMap<>();
         this.status = status;
         panel.addClusteringListener(this);
+        controlListeners.add(ControlListener.class, status);
         initComponents();
         algBox.setSelectedItem("k-means (MacQueen)");
         setDatasets(panel.getDatasets());
@@ -96,6 +99,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
                 String alg = (String) algBox.getSelectedItem();
                 //if algorithm was really changed, trigger execution
                 if (!alg.equals(panel.getAlgorithm().getName())) {
+                    fireBatchStarted(panel.getDataset(), getProps());
                     panel.setAlgorithm(cf.getProvider(alg));
                     execute();
                 }
@@ -110,6 +114,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
             public void actionPerformed(ActionEvent e) {
                 DialogDescriptor dd = new DialogDescriptor(updateUI(getAlgorithm()), "Settings");
                 if (DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
+                    fireBatchStarted(panel.getDataset(), getProps());
                     updateAlgorithm();
                     execute();
                 }
@@ -145,7 +150,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         int repeat = (int) spinRepeat.getValue();
         Props p = getProps();
         if (repeat > 1) {
-            panel.fireBatchStarted(panel.getDataset(), p);
+            fireBatchStarted(panel.getDataset(), p);
         }
         while (i < repeat) {
             panel.execute(p);
@@ -222,6 +227,12 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         dataBox.setEnabled(false);
         btnOptions.setEnabled(false);
         validationBox.setEnabled(false);
+    }
+
+    public void fireBatchStarted(Dataset<? extends Instance> dataset, Props param) {
+        for (ControlListener listener : controlListeners.getListeners(ControlListener.class)) {
+            listener.batchStarted(dataset, param);
+        }
     }
 
 }

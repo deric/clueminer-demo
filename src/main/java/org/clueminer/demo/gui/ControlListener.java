@@ -22,10 +22,11 @@ import org.clueminer.dataset.api.Instance;
 import org.clueminer.utils.Props;
 
 /**
+ * Events triggered by changing settings by user
  *
  * @author deric
  */
-public interface ClusteringGuiListener extends EventListener {
+public interface ControlListener extends EventListener {
 
     /**
      * Triggered when set of repeated runs starts

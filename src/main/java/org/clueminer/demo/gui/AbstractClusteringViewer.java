@@ -54,9 +54,16 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
         dataProvider = provider;
         properties = new Props();
         setDataset(dataProvider.first());
-        exec = new ClusteringExecutorCached();
-        setAlgorithm(ClusteringFactory.getInstance().getDefault());
+
         cg = new ColorBrewer();
+        exec = new ClusteringExecutorCached();
+        ClusteringFactory cf = ClusteringFactory.getInstance();
+        if (cf.hasProvider("k-means")) {
+            setAlgorithm(cf.getProvider("k-means"));
+            properties.putInt("k", 3);
+        } else {
+            setAlgorithm(cf.getDefault());
+        }
         //options.setDatasets(dataProvider.getDatasetNames());
         initComponets();
     }

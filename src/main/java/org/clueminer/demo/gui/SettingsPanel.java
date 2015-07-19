@@ -26,6 +26,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.api.ClusterEvaluation;
 import org.clueminer.clustering.api.Clustering;
@@ -99,7 +101,6 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
                 String alg = (String) algBox.getSelectedItem();
                 //if algorithm was really changed, trigger execution
                 if (!alg.equals(panel.getAlgorithm().getName())) {
-                    fireBatchStarted(panel.getDataset(), getProps());
                     panel.setAlgorithm(cf.getProvider(alg));
                     execute();
                 }
@@ -114,7 +115,6 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
             public void actionPerformed(ActionEvent e) {
                 DialogDescriptor dd = new DialogDescriptor(updateUI(getAlgorithm()), "Settings");
                 if (DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
-                    fireBatchStarted(panel.getDataset(), getProps());
                     updateAlgorithm();
                     execute();
                 }
@@ -142,6 +142,14 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
 
         add(new JLabel("Repeat:"));
         spinRepeat = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
+        spinRepeat.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                //trigger new batch start
+                execute();
+            }
+        });
         add(spinRepeat);
     }
 
@@ -149,12 +157,13 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
         int i = 0;
         int repeat = (int) spinRepeat.getValue();
         Props p = getProps();
-        if (repeat > 1) {
+        if (repeat > 0) {
             fireBatchStarted(panel.getDataset(), p);
-        }
-        while (i < repeat) {
-            panel.execute(p);
-            i++;
+
+            while (i < repeat) {
+                panel.execute(p);
+                i++;
+            }
         }
     }
 

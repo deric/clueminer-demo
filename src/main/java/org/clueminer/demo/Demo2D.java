@@ -21,8 +21,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.SwingUtilities;
-import org.clueminer.dataset.api.DataProvider;
+import org.clueminer.clustering.api.Cluster;
 import org.clueminer.data.DataLoader;
+import org.clueminer.dataset.api.DataProvider;
+import org.clueminer.dataset.api.Instance;
 import org.clueminer.demo.gui.DendroWrapper;
 import org.clueminer.demo.gui.ScatterWrapper;
 import org.clueminer.demo.gui.SettingsPanel;
@@ -40,7 +42,7 @@ public class Demo2D extends BaseFrame {
     private ScatterWrapper plot;
     private SettingsPanel settings;
     private boolean showDendro = true;
-    private DendroWrapper dendro;
+    private DendroWrapper<Instance, Cluster<Instance>> dendro;
 
     public Demo2D() {
         initComponents();
@@ -103,7 +105,7 @@ public class Demo2D extends BaseFrame {
         c.weighty = 8.0;
         if (showDendro) {
             c.weightx = 0.5;
-            dendro = new DendroWrapper(plot, status);
+            dendro = new DendroWrapper<>(plot, status);
             plot.addClusteringListener(dendro);
             c.gridx = 1;
             add(dendro, c);

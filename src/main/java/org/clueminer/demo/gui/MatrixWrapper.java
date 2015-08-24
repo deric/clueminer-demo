@@ -26,8 +26,8 @@ import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.distance.api.Distance;
 import org.clueminer.distance.api.DistanceFactory;
-import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
 import org.clueminer.scatter.matrix.ScatterMatrixPanel;
 import org.clueminer.utils.Props;
@@ -36,13 +36,16 @@ import org.openide.util.TaskListener;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public class MatrixWrapper extends AbstractClusteringViewer implements TaskListener, DatasetViewer {
+public class MatrixWrapper<E extends Instance, C extends Cluster<E>>
+        extends AbstractClusteringViewer<E, C> implements TaskListener, DatasetViewer<E, C> {
 
     private static final long serialVersionUID = -3003232461051594623L;
 
     private ScatterMatrixPanel viewer;
-    private Clustering<? extends Cluster> clust;
+    private Clustering<E, C> clust;
 
     public MatrixWrapper(DataProvider provider) {
         super(provider);
@@ -83,7 +86,7 @@ public class MatrixWrapper extends AbstractClusteringViewer implements TaskListe
                 params.put("algorithm", getAlgorithm().getName());
                 System.out.println(params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
-                DistanceMeasure func = df.getProvider("Euclidean");
+                Distance func = df.getProvider("Euclidean");
                 algorithm.setDistanceFunction(func);
 
                 MemInfo memInfo = new MemInfo();
@@ -115,12 +118,12 @@ public class MatrixWrapper extends AbstractClusteringViewer implements TaskListe
     }
 
     @Override
-    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+    public void clusteringStarted(Dataset<E> dataset, Props params) {
         //
     }
 
     @Override
-    public void clusteringChanged(Clustering clust) {
+    public void clusteringChanged(Clustering<E, C> clust) {
         if (clust != null) {
             viewer.setClustering(clust);
         }

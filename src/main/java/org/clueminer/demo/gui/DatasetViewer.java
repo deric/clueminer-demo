@@ -16,6 +16,7 @@
  */
 package org.clueminer.demo.gui;
 
+import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringListener;
@@ -26,16 +27,18 @@ import org.clueminer.utils.Props;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public interface DatasetViewer extends ClusteringListener {
+public interface DatasetViewer<E extends Instance, C extends Cluster<E>> extends ClusteringListener<E, C> {
 
-    void addClusteringListener(ClusteringListener listener);
+    void addClusteringListener(ClusteringListener<E, C> listener);
 
-    void fireClusteringChanged(Clustering clust);
+    void fireClusteringChanged(Clustering<E, C> clust);
 
-    Dataset<? extends Instance> getDataset();
+    Dataset<E> getDataset();
 
-    void setDataset(Dataset<? extends Instance> dataset);
+    void setDataset(Dataset<E> dataset);
 
     /**
      * Start clustering
@@ -49,9 +52,9 @@ public interface DatasetViewer extends ClusteringListener {
      */
     void abort();
 
-    void setAlgorithm(ClusteringAlgorithm alg);
+    void setAlgorithm(ClusteringAlgorithm<E, C> alg);
 
-    ClusteringAlgorithm getAlgorithm();
+    ClusteringAlgorithm<E, C> getAlgorithm();
 
     void setProperties(Props props);
 

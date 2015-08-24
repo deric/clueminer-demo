@@ -28,8 +28,8 @@ import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.dendrogram.DataProviderMap;
+import org.clueminer.distance.api.Distance;
 import org.clueminer.distance.api.DistanceFactory;
-import org.clueminer.distance.api.DistanceMeasure;
 import org.clueminer.report.MemInfo;
 import org.clueminer.scatter.ScatterPlot;
 import org.clueminer.utils.Props;
@@ -39,15 +39,18 @@ import org.openide.util.TaskListener;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public class ScatterWrapper extends AbstractClusteringViewer implements TaskListener, DatasetViewer {
+public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
+        extends AbstractClusteringViewer<E, C> implements TaskListener, DatasetViewer<E, C> {
 
     private static final long serialVersionUID = -8355392013651815767L;
 
-    private ScatterPlot viewer;
-    private Clustering<? extends Cluster> clust;
+    private ScatterPlot<E, C> viewer;
+    private Clustering<E, C> clust;
 
-    public ScatterWrapper(Map<String, Dataset<? extends Instance>> data) {
+    public ScatterWrapper(Map<String, Dataset<E>> data) {
         this(new DataProviderMap(data));
     }
 
@@ -90,7 +93,7 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
                 params.put("algorithm", getAlgorithm().getName());
                 System.out.println(params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
-                DistanceMeasure func = df.getProvider("Euclidean");
+                Distance func = df.getProvider("Euclidean");
                 algorithm.setDistanceFunction(func);
 
                 MemInfo memInfo = new MemInfo();
@@ -120,19 +123,19 @@ public class ScatterWrapper extends AbstractClusteringViewer implements TaskList
     }
 
     @Override
-    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+    public void clusteringStarted(Dataset<E> dataset, Props params) {
         //
     }
 
     @Override
-    public void clusteringChanged(Clustering clust) {
+    public void clusteringChanged(Clustering<E, C> clust) {
         if (clust != null) {
             viewer.setClustering(clust);
         }
     }
 
     @Override
-    public void resultUpdate(HierarchicalResult hclust) {
+    public void resultUpdate(HierarchicalResult<E> hclust) {
         //
     }
 

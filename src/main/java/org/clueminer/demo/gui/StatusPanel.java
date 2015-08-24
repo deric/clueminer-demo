@@ -38,8 +38,10 @@ import org.clueminer.utils.Props;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public class StatusPanel extends JPanel implements ClusteringListener, ControlListener {
+public class StatusPanel<E extends Instance, C extends Cluster<E>> extends JPanel implements ClusteringListener<E, C>, ControlListener {
 
     private static final long serialVersionUID = -2919926609337848228L;
 
@@ -50,7 +52,7 @@ public class StatusPanel extends JPanel implements ClusteringListener, ControlLi
     private final DatasetViewer plot;
     private ClusterEvaluation evaluator;
     private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00");
-    private Clustering<? extends Cluster> clustering;
+    private Clustering<E, C> clustering;
     private double scoreSum;
     private int repeatCnt;
 
@@ -125,7 +127,7 @@ public class StatusPanel extends JPanel implements ClusteringListener, ControlLi
     }
 
     @Override
-    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+    public void clusteringStarted(Dataset<E> dataset, Props params) {
         lbStatus.setText("Clustering " + dataset.getName() + " with " + params.get("algorithm") + " ...");
         progressBar.setVisible(true);
         progressBar.setIndeterminate(true);

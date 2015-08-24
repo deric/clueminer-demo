@@ -22,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
+import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.HierarchicalResult;
@@ -34,12 +35,14 @@ import org.clueminer.utils.Props;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public class DendroWrapper extends JPanel implements ClusteringListener {
+public class DendroWrapper<E extends Instance, C extends Cluster<E>> extends JPanel implements ClusteringListener<E, C> {
 
     private static final long serialVersionUID = -6978699943366111216L;
 
-    private DgViewer viewer;
+    private DgViewer<E, C> viewer;
     protected final transient EventListenerList guiListeners;
 
     public DendroWrapper(DatasetViewer panel, StatusPanel status) {
@@ -69,7 +72,7 @@ public class DendroWrapper extends JPanel implements ClusteringListener {
     }
 
     @Override
-    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+    public void clusteringStarted(Dataset<E> dataset, Props params) {
 
     }
 

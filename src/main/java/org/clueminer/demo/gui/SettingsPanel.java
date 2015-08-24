@@ -29,6 +29,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.ClusterEvaluation;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
@@ -48,8 +49,10 @@ import org.openide.NotifyDescriptor;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public class SettingsPanel extends JPanel implements ClusteringListener {
+public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPanel implements ClusteringListener<E, C> {
 
     private static final long serialVersionUID = 4694033662557233989L;
 
@@ -229,7 +232,7 @@ public class SettingsPanel extends JPanel implements ClusteringListener {
     }
 
     @Override
-    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+    public void clusteringStarted(Dataset<E> dataset, Props params) {
         //TODO: disable controls?
         algBox.setEnabled(false);
         dataBox.setEnabled(false);

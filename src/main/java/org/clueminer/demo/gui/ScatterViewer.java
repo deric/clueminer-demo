@@ -45,13 +45,16 @@ import org.openide.util.TaskListener;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public class ScatterViewer extends AbstractClusteringViewer implements TaskListener, DatasetViewer {
+public class ScatterViewer<E extends Instance, C extends Cluster<E>>
+        extends AbstractClusteringViewer<E, C> implements TaskListener, DatasetViewer<E, C> {
 
     private static final long serialVersionUID = -8355392013651815767L;
 
     private ScatterPlot viewer;
-    private Clustering<? extends Cluster> clust;
+    private Clustering<E, C> clust;
     private ColorGenerator cg = new ColorBrewer();
 
     public ScatterViewer(Map<String, Dataset<? extends Instance>> data) {
@@ -163,12 +166,12 @@ public class ScatterViewer extends AbstractClusteringViewer implements TaskListe
     }
 
     @Override
-    public void clusteringStarted(Dataset<? extends Instance> dataset, Props params) {
+    public void clusteringStarted(Dataset<E> dataset, Props params) {
         //
     }
 
     @Override
-    public void clusteringChanged(Clustering clust) {
+    public void clusteringChanged(Clustering<E, C> clust) {
         if (clust != null) {
             viewer.setClustering(clust);
         }

@@ -19,6 +19,7 @@ package org.clueminer.demo.gui;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.ClusteringExecutorCached;
+import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringFactory;
@@ -35,14 +36,16 @@ import org.openide.util.RequestProcessor;
 /**
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public abstract class AbstractClusteringViewer extends JPanel implements DatasetViewer {
+public abstract class AbstractClusteringViewer<E extends Instance, C extends Cluster<E>> extends JPanel implements DatasetViewer<E, C> {
 
     private static final long serialVersionUID = -7047730532984328395L;
 
-    protected ClusteringAlgorithm algorithm;
-    protected Dataset<? extends Instance> dataset;
-    protected DataProvider dataProvider;
+    protected ClusteringAlgorithm<E, C> algorithm;
+    protected Dataset<E> dataset;
+    protected DataProvider<E> dataProvider;
     protected Props properties;
     protected Executor exec;
     protected ColorGenerator cg;
@@ -50,7 +53,7 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
     protected static RequestProcessor RP = new RequestProcessor("Clustering");
     protected RequestProcessor.Task task;
 
-    public AbstractClusteringViewer(DataProvider provider) {
+    public AbstractClusteringViewer(DataProvider<E> provider) {
         dataProvider = provider;
         properties = new Props();
         setDataset(dataProvider.first());
@@ -87,12 +90,12 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
     }
 
     @Override
-    public Dataset<? extends Instance> getDataset() {
+    public Dataset<E> getDataset() {
         return dataset;
     }
 
     @Override
-    public final void setDataset(Dataset<? extends Instance> dataset) {
+    public final void setDataset(Dataset<E> dataset) {
         this.dataset = dataset;
     }
 
@@ -117,18 +120,18 @@ public abstract class AbstractClusteringViewer extends JPanel implements Dataset
     }
 
     @Override
-    public void addClusteringListener(ClusteringListener listener) {
+    public void addClusteringListener(ClusteringListener<E, C> listener) {
         clusteringListeners.add(ClusteringListener.class, listener);
     }
 
     @Override
-    public void fireClusteringChanged(Clustering clust) {
+    public void fireClusteringChanged(Clustering<E, C> clust) {
         for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
             listener.clusteringChanged(clust);
         }
     }
 
-    public void fireClusteringStarted(Dataset<? extends Instance> dataset, Props param) {
+    public void fireClusteringStarted(Dataset<E> dataset, Props param) {
         for (ClusteringListener listener : clusteringListeners.getListeners(ClusteringListener.class)) {
             listener.clusteringStarted(dataset, param);
         }

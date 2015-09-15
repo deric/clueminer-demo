@@ -31,9 +31,10 @@ public class BaseFrame extends JPanel {
     private static final long serialVersionUID = 3826372961476533745L;
 
     protected StatusPanel status;
+    protected String title = "Clustering demo";
 
     public String getTitle() {
-        return "Clustering demo";
+        return title;
     }
 
     protected JFrame showInFrame() {

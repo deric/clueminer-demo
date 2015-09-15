@@ -25,8 +25,8 @@ import org.clueminer.data.DataLoader;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.demo.gui.DendroWrapper;
 import org.clueminer.demo.gui.ScatterViewer;
-import org.clueminer.demo.gui.SettingsPanel;
 import org.clueminer.demo.gui.StatusPanel;
+import org.clueminer.demo.gui.ViewerSettings;
 
 /**
  *
@@ -37,11 +37,12 @@ public class DataViewer extends BaseFrame {
     private static final long serialVersionUID = 1458227382306409023L;
 
     private ScatterViewer plot;
-    private SettingsPanel settings;
+    private ViewerSettings settings;
     private boolean showDendro = true;
     private DendroWrapper dendro;
 
     public DataViewer() {
+        this.title = "Data viewer";
         initComponents();
     }
 
@@ -85,7 +86,7 @@ public class DataViewer extends BaseFrame {
         c.weightx = c.weighty = 0.2; //no fill while resize
 
         status = new StatusPanel(plot);
-        settings = new SettingsPanel(plot, status);
+        settings = new ViewerSettings<>(plot, status);
         gbl.setConstraints(settings, c);
         add(settings, c);
         //status bar

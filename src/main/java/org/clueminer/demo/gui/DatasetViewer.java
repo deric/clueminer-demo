@@ -62,4 +62,10 @@ public interface DatasetViewer<E extends Instance, C extends Cluster<E>> extends
 
     String[] getDatasets();
 
+    /**
+     * Get current clustering result
+     *
+     * @return
+     */
+    Clustering<E, C> getClustering();
 }

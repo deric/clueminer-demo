@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2011-2015 clueminer.org
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,7 +45,6 @@ public class MatrixWrapper<E extends Instance, C extends Cluster<E>>
     private static final long serialVersionUID = -3003232461051594623L;
 
     private ScatterMatrixPanel viewer;
-    private Clustering<E, C> clust;
 
     public MatrixWrapper(DataProvider provider) {
         super(provider);
@@ -72,6 +71,7 @@ public class MatrixWrapper<E extends Instance, C extends Cluster<E>>
 
     public void setClustering(Clustering clusters) {
         viewer.setClustering(clusters);
+        clust = clusters;
     }
 
     @Override

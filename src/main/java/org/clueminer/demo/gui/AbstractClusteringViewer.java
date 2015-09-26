@@ -52,6 +52,7 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
     protected final transient EventListenerList clusteringListeners = new EventListenerList();
     protected static RequestProcessor RP = new RequestProcessor("Clustering");
     protected RequestProcessor.Task task;
+    protected Clustering<E, C> clust;
 
     public AbstractClusteringViewer(DataProvider<E> provider) {
         dataProvider = provider;
@@ -147,6 +148,11 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
         }
         //no result yet
         fireClusteringChanged(null);
+    }
+
+    @Override
+    public Clustering<E, C> getClustering() {
+        return clust;
     }
 
 }

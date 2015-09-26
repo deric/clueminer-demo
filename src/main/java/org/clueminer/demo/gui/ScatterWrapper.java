@@ -48,7 +48,6 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
     private static final long serialVersionUID = -8355392013651815767L;
 
     private ScatterPlot<E, C> viewer;
-    private Clustering<E, C> clust;
 
     public ScatterWrapper(Map<String, Dataset<E>> data) {
         this(new DataProviderMap(data));
@@ -79,6 +78,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
 
     public void setClustering(Clustering clusters) {
         viewer.setClustering(clusters);
+        clust = clusters;
     }
 
     @Override
@@ -135,7 +135,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
     }
 
     @Override
-    public void resultUpdate(HierarchicalResult<E> hclust) {
+    public void resultUpdate(HierarchicalResult<E, C> hclust) {
         //
     }
 

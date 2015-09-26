@@ -39,12 +39,15 @@ import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.factory.EvaluationFactory;
 import org.clueminer.clustering.gui.ClusteringDialog;
 import org.clueminer.clustering.gui.ClusteringDialogFactory;
+import org.clueminer.clustering.gui.ClusteringExport;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.dendrogram.FileExportDialog;
 import org.clueminer.utils.Props;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -62,6 +65,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private JComboBox algBox;
     private JComboBox validationBox;
     private JSpinner spinRepeat;
+    private JButton export;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
     private ClusterEvaluation evaluator;
@@ -153,6 +157,31 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
             }
         });
         add(spinRepeat);
+
+        export = new JButton(ImageUtilities.loadImageIcon("org/clueminer/demo/save16.png", false));
+        export.setToolTipText("Export current results");
+        add(export);
+
+        export.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                FileExportDialog exportDialog = new FileExportDialog();
+                DialogDescriptor dd = new DialogDescriptor(exportDialog, "Export to...");
+                if (!DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
+                    //exportDialog.destroy();
+                    return;
+                }
+                //exportDialog.destroy();
+
+                if (dd.getValue() == DialogDescriptor.OK_OPTION) {
+                    ClusteringExport exp = exportDialog.getExporter();
+                    exp.setClustering(panel.getClustering());
+                    //exp.setViewer(viewer);
+                    exp.export();
+                }
+            }
+        });
     }
 
     private void execute() {

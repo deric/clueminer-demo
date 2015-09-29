@@ -16,10 +16,25 @@
  */
 package org.clueminer.demo.gui;
 
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,12 +44,9 @@ import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.EvaluationTable;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.factory.Clusterings;
-import org.clueminer.colors.ColorBrewer;
-import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
-import static org.clueminer.demo.gui.AbstractClusteringViewer.RP;
 import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.eval.utils.HashEvaluationTable;
 import org.clueminer.scatter.ScatterPlot;
@@ -54,8 +66,14 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     private static final long serialVersionUID = -8355392013651815767L;
 
     private ScatterPlot viewer;
-    private Clustering<E, C> clust;
-    private ColorGenerator cg = new ColorBrewer();
+    private Point startDrag;
+    protected Dimension reqSize = new Dimension(0, 0);
+    private Shape selection;
+
+    private static final Color DRAWING_RECT_COLOR = new Color(200, 200, 255);
+    private Rectangle rect = null;
+    private boolean drawing = false;
+    private Point mousePress = null;
 
     public ScatterViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -71,12 +89,13 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
 
-        viewer = new ScatterPlot();
+        ScattMouseListener ml = new ScattMouseListener();
+        //panel = new JLayeredPane();
+        viewer = new ScatterPlot(ml, ml);
         c.fill = GridBagConstraints.BOTH;
         c.gridx = 0;
         c.gridy = 0;
         c.gridheight = 1;
-        c.insets = new Insets(5, 5, 5, 5);
         c.anchor = GridBagConstraints.NORTHEAST;
         c.weightx = c.weighty = 1.0; //ratio for filling the frame space
         gbl.setConstraints((Component) viewer, c);
@@ -86,6 +105,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
     public void setClustering(Clustering clusters) {
         viewer.setClustering(clusters);
+        this.clust = clusters;
     }
 
     /**
@@ -180,6 +200,86 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     @Override
     public void resultUpdate(HierarchicalResult hclust) {
         //
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        render((Graphics2D) g);
+    }
+
+    public void render(Graphics2D g2) {
+        Insets insets = getInsets();
+
+        if (drawing) {
+            g2.setColor(DRAWING_RECT_COLOR);
+            g2.draw(rect);
+        }
+
+        if (selection != null) {
+            //image = getScreenShot();
+            //Graphics2D g2 = bufferedImage.createGraphics();
+            //g2.drawImage(image, WIDTH, 0, this);
+            g2.setComposite(AlphaComposite.SrcOver);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            //g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.50f));
+            g2.setStroke(new BasicStroke(2));
+            g2.setColor(new Color(160, 160, 160, 128));
+            g2.setPaint(Color.LIGHT_GRAY);
+
+            //Area fill = new Area(new Rectangle(new Point(0, 0), getSize()));
+            //g2.fill(fill);
+            g2.draw(selection);
+            g2.dispose();
+        }
+    }
+
+    private Rectangle2D.Double makeRectangle(int x1, int y1, int x2, int y2) {
+        return new Rectangle2D.Double(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x1 - x2), Math.abs(y1 - y2));
+    }
+
+    private class ScattMouseListener extends MouseAdapter implements MouseListener, MouseMotionListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            startDrag = new Point(e.getX(), e.getY());
+            mousePress = e.getPoint();
+            repaint();
+        }
+
+        public void mouseDragged(MouseEvent e) {
+            drawing = true;
+            int x = Math.min(mousePress.x, e.getPoint().x);
+            int y = Math.min(mousePress.y, e.getPoint().y);
+            int width = Math.abs(mousePress.x - e.getPoint().x);
+            int height = Math.abs(mousePress.y - e.getPoint().y);
+
+            rect = new Rectangle(x, y, width, height);
+            repaint();
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            selection = makeRectangle(startDrag.x, startDrag.y, e.getX(), e.getY());
+            startDrag = null;
+            drawing = false;
+            repaint();
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
     }
 
 }

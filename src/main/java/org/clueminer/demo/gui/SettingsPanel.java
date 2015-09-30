@@ -65,7 +65,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private JComboBox algBox;
     private JComboBox validationBox;
     private JSpinner spinRepeat;
-    private JButton export;
+    private JButton btnExport;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
     private ClusterEvaluation evaluator;
@@ -158,11 +158,11 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
         });
         add(spinRepeat);
 
-        export = new JButton(ImageUtilities.loadImageIcon("org/clueminer/demo/save16.png", false));
-        export.setToolTipText("Export current results");
-        add(export);
+        btnExport = new JButton(ImageUtilities.loadImageIcon("org/clueminer/demo/save16.png", false));
+        btnExport.setToolTipText("Export current results");
+        add(btnExport);
 
-        export.addActionListener(new ActionListener() {
+        btnExport.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ae) {

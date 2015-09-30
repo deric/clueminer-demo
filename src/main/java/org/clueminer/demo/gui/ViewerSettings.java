@@ -19,6 +19,7 @@ package org.clueminer.demo.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
@@ -27,9 +28,15 @@ import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.gui.ClusteringDialog;
+import org.clueminer.clustering.gui.ClusteringExport;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.dendrogram.FileExportDialog;
 import org.clueminer.utils.Props;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
+import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -44,6 +51,7 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
     private JComboBox dataBox;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
+    private JButton btnExport;
     protected final transient EventListenerList controlListeners = new EventListenerList();
 
     public ViewerSettings(DatasetViewer panel, StatusPanel status) {
@@ -68,6 +76,30 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
         });
         add(dataBox);
 
+        btnExport = new JButton(ImageUtilities.loadImageIcon("org/clueminer/demo/save16.png", false));
+        btnExport.setToolTipText("Export current results");
+        add(btnExport);
+
+        btnExport.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                FileExportDialog exportDialog = new FileExportDialog();
+                DialogDescriptor dd = new DialogDescriptor(exportDialog, "Export to...");
+                if (!DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
+                    //exportDialog.destroy();
+                    return;
+                }
+                //exportDialog.destroy();
+
+                if (dd.getValue() == DialogDescriptor.OK_OPTION) {
+                    ClusteringExport exp = exportDialog.getExporter();
+                    exp.setClustering(panel.getClustering());
+                    //exp.setViewer(viewer);
+                    exp.export();
+                }
+            }
+        });
     }
 
     private void execute() {

@@ -137,7 +137,6 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         /* if (set.size() == 0) {
          return golden;
          }*/
-        //golden.lookupAdd(dataset);
         EvaluationTable evalTable = new HashEvaluationTable(golden, dataset);
         golden.lookupAdd(evalTable);
         HashMap<Object, Integer> map = new HashMap<>(set.size());
@@ -167,6 +166,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             }
             c.add(inst);
         }
+        golden.lookupAdd(dataset);
 
         return golden;
     }

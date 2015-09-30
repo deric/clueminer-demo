@@ -34,6 +34,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -234,6 +235,17 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         }
     }
 
+    private void findPoints(Shape selection) {
+        selection.getBounds();
+
+        Rectangle2D.Double rect = viewer.tranlateSelection(selection);
+        System.out.println("searching: " + rect);
+    }
+
+    private Point2D translate(E inst) {
+        return null;
+    }
+
     private Rectangle2D.Double makeRectangle(int x1, int y1, int x2, int y2) {
         return new Rectangle2D.Double(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x1 - x2), Math.abs(y1 - y2));
     }
@@ -252,6 +264,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             repaint();
         }
 
+        @Override
         public void mouseDragged(MouseEvent e) {
             drawing = true;
             int x = Math.min(mousePress.x, e.getPoint().x);
@@ -269,6 +282,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             startDrag = null;
             drawing = false;
             repaint();
+            findPoints(selection);
         }
 
         @Override

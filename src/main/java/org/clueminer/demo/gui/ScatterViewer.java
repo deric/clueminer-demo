@@ -50,6 +50,7 @@ import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.eval.utils.HashEvaluationTable;
+import org.clueminer.knn.KDTree;
 import org.clueminer.scatter.ScatterPlot;
 import org.clueminer.utils.Props;
 import org.openide.util.Task;
@@ -75,6 +76,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     private Rectangle rect = null;
     private boolean drawing = false;
     private Point mousePress = null;
+    private KDTree<E> kdTree;
 
     public ScatterViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -135,9 +137,6 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         SortedSet set = dataset.getClasses();
         Clustering golden = Clusterings.newList();
 
-        /* if (set.size() == 0) {
-         return golden;
-         }*/
         EvaluationTable evalTable = new HashEvaluationTable(golden, dataset);
         golden.lookupAdd(evalTable);
         HashMap<Object, Integer> map = new HashMap<>(set.size());
@@ -186,9 +185,16 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         }
     }
 
+    /**
+     * Triggered when dataset was changed
+     *
+     * @param dataset
+     * @param params
+     */
     @Override
     public void clusteringStarted(Dataset<E> dataset, Props params) {
-        //
+        //build kd-tree for fast search
+        kdTree = new KDTree<>(dataset);
     }
 
     @Override
@@ -236,8 +242,6 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     }
 
     private void findPoints(Shape selection) {
-        selection.getBounds();
-
         Rectangle2D.Double rect = viewer.tranlateSelection(selection);
         System.out.println("searching: " + rect);
     }

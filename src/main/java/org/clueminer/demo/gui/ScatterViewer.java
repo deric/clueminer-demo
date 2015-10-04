@@ -308,6 +308,37 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         System.out.println("kdtree size: " + kdTree.size());
     }
 
+    @Override
+    public void assignLabelToSelection(String label) {
+        int i = 0;
+        if (clust != null) {
+            C target = clust.get(label);
+            if (target == null) {
+                target = clust.createCluster();
+                clust.setClusterName(target.getClusterId(), label);
+                System.out.println("created cluster: " + target.getName() + ", id: " + target.getClusterId());
+            }
+            if (items != null) {
+                C curr;
+                for (E item : items) {
+                    curr = clust.assignedCluster(item);
+                    if (curr.getClusterId() != target.getClusterId()) {
+                        if (!curr.remove(item)) {
+                            throw new RuntimeException("failed to remove item: " + item);
+                        }
+                        target.add(item);
+                        i++;
+                    }
+                }
+            } else {
+                System.out.println("no items selected!");
+            }
+        } else {
+            throw new RuntimeException("missing clustering");
+        }
+        System.out.println("updated " + i + " assignments");
+    }
+
     private class ScattMouseListener extends MouseAdapter implements MouseListener, MouseMotionListener {
 
         @Override

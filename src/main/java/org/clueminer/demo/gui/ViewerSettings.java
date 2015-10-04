@@ -23,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
+import org.clueminer.clustering.api.AbstractClusteringAlgorithm;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringListener;
@@ -51,7 +52,9 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
     private JComboBox dataBox;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
+    private JComboBox klassBox;
     private JButton btnExport;
+    private JButton btnApply;
     protected final transient EventListenerList controlListeners = new EventListenerList();
 
     public ViewerSettings(DatasetViewer panel, StatusPanel status) {
@@ -76,6 +79,22 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
         });
         add(dataBox);
 
+        klassBox = new JComboBox();
+        add(klassBox);
+        btnApply = new JButton("Apply");
+        btnApply.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object klass = klassBox.getSelectedItem();
+                if (klass != null) {
+                    System.out.println("applyng class: " + klass);
+                    panel.assignLabelToSelection(klass.toString());
+                }
+            }
+        });
+        add(btnApply);
+
         btnExport = new JButton(ImageUtilities.loadImageIcon("org/clueminer/demo/save16.png", false));
         btnExport.setToolTipText("Export current results");
         add(btnExport);
@@ -94,6 +113,7 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
 
                 if (dd.getValue() == DialogDescriptor.OK_OPTION) {
                     ClusteringExport exp = exportDialog.getExporter();
+                    System.out.println("clust size: " + panel.getClustering().size());
                     exp.setClustering(panel.getClustering());
                     //exp.setViewer(viewer);
                     exp.export();
@@ -123,8 +143,19 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
     }
 
     @Override
-    public void clusteringChanged(Clustering clust) {
+    public void clusteringChanged(Clustering<E, C> clust) {
         dataBox.setEnabled(true);
+        klassBox.removeAllItems();
+        boolean noise = false;
+        for (C cluster : clust) {
+            klassBox.addItem(cluster.getName());
+            if (cluster.getName().equals(AbstractClusteringAlgorithm.OUTLIER_LABEL)) {
+                noise = true;
+            }
+        }
+        if (!noise) {
+            klassBox.addItem(AbstractClusteringAlgorithm.OUTLIER_LABEL);
+        }
     }
 
     @Override

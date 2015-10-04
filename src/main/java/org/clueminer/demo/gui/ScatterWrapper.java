@@ -144,4 +144,9 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
         //
     }
 
+    @Override
+    public void assignLabelToSelection(String label) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

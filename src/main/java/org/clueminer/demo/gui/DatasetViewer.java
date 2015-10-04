@@ -68,4 +68,11 @@ public interface DatasetViewer<E extends Instance, C extends Cluster<E>> extends
      * @return
      */
     Clustering<E, C> getClustering();
+
+    /**
+     * Assign given label to selected items
+     *
+     * @param label
+     */
+    void assignLabelToSelection(String label);
 }

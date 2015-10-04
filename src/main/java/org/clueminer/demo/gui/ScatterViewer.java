@@ -30,14 +30,18 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import org.clueminer.clustering.api.Cluster;
@@ -50,9 +54,12 @@ import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.eval.utils.HashEvaluationTable;
-import org.clueminer.knn.KDTree;
+import org.clueminer.kdtree.KDTree;
+import org.clueminer.kdtree.KeyDuplicateException;
+import org.clueminer.kdtree.KeySizeException;
 import org.clueminer.scatter.ScatterPlot;
 import org.clueminer.utils.Props;
+import org.openide.util.Exceptions;
 import org.openide.util.Task;
 import org.openide.util.TaskListener;
 
@@ -77,6 +84,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     private boolean drawing = false;
     private Point mousePress = null;
     private KDTree<E> kdTree;
+    private List<E> items;
 
     public ScatterViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -193,8 +201,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
      */
     @Override
     public void clusteringStarted(Dataset<E> dataset, Props params) {
-        //build kd-tree for fast search
-        kdTree = new KDTree<>(dataset);
+        //
     }
 
     @Override
@@ -227,12 +234,21 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             //image = getScreenShot();
             //Graphics2D g2 = bufferedImage.createGraphics();
             //g2.drawImage(image, WIDTH, 0, this);
+            Stroke stroke = new BasicStroke(2);
             g2.setComposite(AlphaComposite.SrcOver);
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             //g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.50f));
-            g2.setStroke(new BasicStroke(2));
+            g2.setStroke(stroke);
             g2.setColor(new Color(160, 160, 160, 128));
             g2.setPaint(Color.LIGHT_GRAY);
+
+            //draw selection
+            g2.setColor(Color.RED);
+            if (items != null) {
+                for (E item : items) {
+                    drawCircle(g2, translate(item), stroke, 4);
+                }
+            }
 
             //Area fill = new Area(new Rectangle(new Point(0, 0), getSize()));
             //g2.fill(fill);
@@ -241,17 +257,55 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         }
     }
 
+    public void drawCircle(Graphics2D g, Point2D point, Stroke stroke, int markerSize) {
+        g.setStroke(stroke);
+        double halfSize = (double) markerSize / 2;
+        Shape circle = new Ellipse2D.Double(point.getX() - halfSize, point.getY() - halfSize, markerSize, markerSize);
+        g.fill(circle);
+
+    }
+
     private void findPoints(Shape selection) {
         Rectangle2D.Double rect = viewer.tranlateSelection(selection);
-        System.out.println("searching: " + rect);
+        double[] lowk = new double[dataset.attributeCount()];
+        double[] uppk = new double[dataset.attributeCount()];
+
+        lowk[0] = rect.x;
+        uppk[0] = rect.x + rect.width;
+        lowk[1] = Math.min(rect.y, rect.y - rect.height);
+        uppk[1] = Math.max(rect.y, rect.y - rect.height);
+        System.out.println("l: " + Arrays.toString(lowk));
+        System.out.println("h: " + Arrays.toString(uppk));
+        try {
+            items = kdTree.range(lowk, uppk);
+            System.out.println("result size: " + items.size());
+        } catch (KeySizeException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     private Point2D translate(E inst) {
-        return null;
+        return viewer.posOnCanvas(inst.get(0), inst.get(1));
     }
 
     private Rectangle2D.Double makeRectangle(int x1, int y1, int x2, int y2) {
         return new Rectangle2D.Double(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x1 - x2), Math.abs(y1 - y2));
+    }
+
+    @Override
+    public void datasetChanged(Dataset<E> dataset) {
+        //build kd-tree for fast search
+        kdTree = new KDTree<>(dataset.attributeCount());
+        E inst;
+        for (int i = 0; i < dataset.size(); i++) {
+            try {
+                inst = dataset.get(i);
+                kdTree.insert(inst.arrayCopy(), inst);
+            } catch (KeySizeException | KeyDuplicateException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        System.out.println("kdtree size: " + kdTree.size());
     }
 
     private class ScattMouseListener extends MouseAdapter implements MouseListener, MouseMotionListener {

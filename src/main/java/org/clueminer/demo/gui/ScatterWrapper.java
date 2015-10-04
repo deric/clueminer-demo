@@ -139,4 +139,9 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
         //
     }
 
+    @Override
+    public void datasetChanged(Dataset<E> dataset) {
+        //
+    }
+
 }

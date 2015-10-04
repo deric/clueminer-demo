@@ -134,4 +134,9 @@ public class MatrixWrapper<E extends Instance, C extends Cluster<E>>
         //
     }
 
+    @Override
+    public void datasetChanged(Dataset<E> dataset) {
+        //
+    }
+
 }

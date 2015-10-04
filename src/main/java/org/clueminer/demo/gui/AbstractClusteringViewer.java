@@ -114,10 +114,13 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
         return dataProvider.getDatasetNames();
     }
 
+    public abstract void datasetChanged(Dataset<E> dataset);
+
     @Override
     public void dataChanged(String datasetName) {
         setDataset(dataProvider.getDataset(datasetName));
         System.out.println("dataset changed to " + datasetName + ": " + System.identityHashCode(getDataset()));
+        datasetChanged(dataset);
     }
 
     @Override

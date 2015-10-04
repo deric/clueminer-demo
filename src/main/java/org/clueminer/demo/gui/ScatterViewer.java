@@ -153,9 +153,10 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         int i = 0;
         Cluster c;
         cg.reset();
+        int avgSize = (int) Math.sqrt(dataset.size());
         while (it.hasNext()) {
             obj = it.next();
-            c = golden.createCluster(i);
+            c = golden.createCluster(i, avgSize, obj.toString());
             c.setAttributes(dataset.getAttributes());
             c.setColor(cg.next());
             map.put(obj, i++);
@@ -163,6 +164,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
         int assign;
 
+        Object klass;
         for (Instance inst : dataset) {
             if (map.containsKey(inst.classValue())) {
                 assign = map.get(inst.classValue());
@@ -170,7 +172,8 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             } else {
                 c = golden.createCluster(i);
                 c.setAttributes(dataset.getAttributes());
-                map.put(inst.classValue(), i++);
+                klass = inst.classValue();
+                map.put(klass, i++);
             }
             c.add(inst);
         }
@@ -335,6 +338,10 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             }
         } else {
             throw new RuntimeException("missing clustering");
+        }
+        if (i > 0) {
+            fireClusteringChanged(clust);
+            repaint();
         }
         System.out.println("updated " + i + " assignments");
     }

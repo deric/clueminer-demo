@@ -90,6 +90,7 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
                 if (klass != null) {
                     System.out.println("applyng class: " + klass);
                     panel.assignLabelToSelection(klass.toString());
+                    klassBox.setSelectedItem(klass);
                 }
             }
         });

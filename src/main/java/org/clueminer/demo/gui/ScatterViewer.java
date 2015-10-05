@@ -38,7 +38,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -277,11 +276,8 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         uppk[0] = rect.x + rect.width;
         lowk[1] = Math.min(rect.y, rect.y - rect.height);
         uppk[1] = Math.max(rect.y, rect.y - rect.height);
-        System.out.println("l: " + Arrays.toString(lowk));
-        System.out.println("h: " + Arrays.toString(uppk));
         try {
             items = kdTree.range(lowk, uppk);
-            System.out.println("result size: " + items.size());
         } catch (KeySizeException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -297,6 +293,8 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
     @Override
     public void datasetChanged(Dataset<E> dataset) {
+        items = null;
+        selection = null;
         //build kd-tree for fast search
         kdTree = new KDTree<>(dataset.attributeCount());
         E inst;

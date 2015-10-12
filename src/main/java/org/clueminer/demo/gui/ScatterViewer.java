@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import javax.swing.JPanel;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.EvaluationTable;
@@ -74,6 +75,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     private static final long serialVersionUID = -8355392013651815767L;
 
     private ScatterPlot viewer;
+    private Scatter3DPlot viewer3d;
     private Point startDrag;
     protected Dimension reqSize = new Dimension(0, 0);
     private Shape selection;
@@ -84,6 +86,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     private Point mousePress = null;
     private KDTree<E> kdTree;
     private List<E> items;
+    private boolean mode2d = true;
 
     public ScatterViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -114,7 +117,12 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     }
 
     public void setClustering(Clustering clusters) {
-        viewer.setClustering(clusters);
+        if (mode2d) {
+            viewer.setClustering(clusters);
+        } else {
+            viewer3d.setClustering(clusters);
+        }
+
         this.clust = clusters;
     }
 
@@ -184,7 +192,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     @Override
     public void taskFinished(Task task) {
         if (clust != null && clust.size() > 0 && clust.instancesCount() > 0) {
-            viewer.setClustering(clust);
+            setClustering(clust);
             fireClusteringChanged(clust);
 
             validate();
@@ -209,7 +217,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     @Override
     public void clusteringChanged(Clustering<E, C> clust) {
         if (clust != null) {
-            viewer.setClustering(clust);
+            setClustering(clust);
         }
     }
 
@@ -268,18 +276,20 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     }
 
     private void findPoints(Shape selection) {
-        Rectangle2D.Double rect = viewer.tranlateSelection(selection);
-        double[] lowk = new double[dataset.attributeCount()];
-        double[] uppk = new double[dataset.attributeCount()];
+        if (mode2d) {
+            Rectangle2D.Double rectangle = viewer.tranlateSelection(selection);
+            double[] lowk = new double[dataset.attributeCount()];
+            double[] uppk = new double[dataset.attributeCount()];
 
-        lowk[0] = rect.x;
-        uppk[0] = rect.x + rect.width;
-        lowk[1] = Math.min(rect.y, rect.y - rect.height);
-        uppk[1] = Math.max(rect.y, rect.y - rect.height);
-        try {
-            items = kdTree.range(lowk, uppk);
-        } catch (KeySizeException ex) {
-            Exceptions.printStackTrace(ex);
+            lowk[0] = rectangle.x;
+            uppk[0] = rectangle.x + rectangle.width;
+            lowk[1] = Math.min(rectangle.y, rectangle.y - rectangle.height);
+            uppk[1] = Math.max(rectangle.y, rectangle.y - rectangle.height);
+            try {
+                items = kdTree.range(lowk, uppk);
+            } catch (KeySizeException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 
@@ -293,6 +303,19 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
     @Override
     public void datasetChanged(Dataset<E> dataset) {
+        //eventuall switch to 3D
+        if (dataset.attributeCount() == 3) {
+            mode2d = false;
+            if (viewer3d == null) {
+                viewer3d = new Scatter3DPlot();
+            }
+            setViewer(viewer3d);
+        } else {
+            if (!mode2d) {
+                setViewer(viewer);
+            }
+            mode2d = true;
+        }
         items = null;
         selection = null;
         //build kd-tree for fast search
@@ -307,6 +330,22 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             }
         }
         System.out.println("kdtree size: " + kdTree.size());
+    }
+
+    private void setViewer(JPanel view) {
+        this.removeAll();
+        GridBagConstraints c = new GridBagConstraints();
+        GridBagLayout gbl = (GridBagLayout) this.getLayout();
+
+        ScattMouseListener ml = new ScattMouseListener();
+        c.fill = GridBagConstraints.BOTH;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridheight = 1;
+        c.anchor = GridBagConstraints.NORTHEAST;
+        c.weightx = c.weighty = 1.0; //ratio for filling the frame space
+        gbl.setConstraints((Component) viewer, c);
+        this.add((Component) view, c);
     }
 
     @Override

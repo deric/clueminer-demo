@@ -93,6 +93,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
             @Override
             public void actionPerformed(ActionEvent e) {
                 panel.dataChanged((String) dataBox.getSelectedItem());
+                updateAlgorithm();
                 execute();
             }
         });
@@ -108,6 +109,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
                 //if algorithm was really changed, trigger execution
                 if (!alg.equals(panel.getAlgorithm().getName())) {
                     panel.setAlgorithm(cf.getProvider(alg));
+                    updateAlgorithm();
                     execute();
                 }
             }
@@ -121,7 +123,6 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
             public void actionPerformed(ActionEvent e) {
                 DialogDescriptor dd = new DialogDescriptor(updateUI(getAlgorithm()), "Settings");
                 if (DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
-                    updateAlgorithm();
                     execute();
                 }
             }
@@ -203,14 +204,17 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     }
 
     private JPanel updateUI(ClusteringAlgorithm alg) {
-        optPanel = null;
-        for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {
-            if (dlg.isUIfor(alg, panel.getDataset())) {
-                optPanel = dlg;
-                if (!optPanels.containsKey(alg)) {
-                    optPanels.put(alg, dlg.getPanel());
+        if (optPanel != null && optPanel.isUIfor(alg, null)) {
+            return optPanel.getPanel();
+        } else {
+            for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {
+                if (dlg.isUIfor(alg, panel.getDataset())) {
+                    optPanel = dlg;
+                    if (!optPanels.containsKey(alg)) {
+                        optPanels.put(alg, dlg.getPanel());
+                    }
+                    return dlg.getPanel();
                 }
-                return dlg.getPanel();
             }
         }
         //last resort

@@ -23,7 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
-import org.clueminer.clustering.api.AbstractClusteringAlgorithm;
+import org.clueminer.clustering.api.Algorithm;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringListener;
@@ -150,12 +150,12 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
         boolean noise = false;
         for (C cluster : clust) {
             klassBox.addItem(cluster.getName());
-            if (cluster.getName().equals(AbstractClusteringAlgorithm.OUTLIER_LABEL)) {
+            if (cluster.getName().equals(Algorithm.OUTLIER_LABEL)) {
                 noise = true;
             }
         }
         if (!noise) {
-            klassBox.addItem(AbstractClusteringAlgorithm.OUTLIER_LABEL);
+            klassBox.addItem(Algorithm.OUTLIER_LABEL);
         }
     }
 

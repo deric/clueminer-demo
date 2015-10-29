@@ -144,7 +144,6 @@ public class StatusPanel<E extends Instance, C extends Cluster<E>> extends JPane
 
     @Override
     public void batchStarted(Dataset<? extends Instance> dataset, Props params) {
-        System.out.println("reset batch sum");
         repeatCnt = 0;
         scoreSum = 0.0;
     }

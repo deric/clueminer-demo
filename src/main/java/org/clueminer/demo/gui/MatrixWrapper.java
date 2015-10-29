@@ -84,7 +84,6 @@ public class MatrixWrapper<E extends Instance, C extends Cluster<E>>
             @Override
             public void run() {
                 params.put("algorithm", getAlgorithm().getName());
-                System.out.println(params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
                 Distance func = df.getProvider("Euclidean");
                 algorithm.setDistanceFunction(func);
@@ -93,6 +92,7 @@ public class MatrixWrapper<E extends Instance, C extends Cluster<E>>
                 fireClusteringStarted(dataset, params);
                 exec.setAlgorithm(algorithm);
                 clust = exec.clusterRows(dataset, params);
+                System.out.println(clust.getParams().toString());
                 memInfo.report();
                 System.out.println("------");
             }

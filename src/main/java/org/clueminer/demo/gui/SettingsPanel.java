@@ -204,7 +204,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     }
 
     private JPanel updateUI(ClusteringAlgorithm alg) {
-        if (optPanel != null && optPanel.isUIfor(alg, null)) {
+        if (optPanel != null && optPanel.isUIfor(alg, panel.getDataset())) {
             return optPanel.getPanel();
         } else {
             for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {

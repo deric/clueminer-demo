@@ -118,12 +118,23 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
     public void setClustering(Clustering clusters) {
         if (mode2d) {
+            System.out.println("clusters: " + clusters.size());
             viewer.setClustering(clusters);
         } else {
             viewer3d.setClustering(clusters);
         }
 
         this.clust = clusters;
+    }
+
+    @Override
+    public void setSize(int w, int h) {
+        super.setSize(w, h);
+        if (mode2d) {
+            viewer.setSize(w, h);
+        } else {
+            viewer3d.setSize(w, h);
+        }
     }
 
     /**
@@ -148,7 +159,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         task.addTaskListener(this);
     }
 
-    private Clustering goldenClustering(Dataset<? extends Instance> dataset) {
+    public Clustering goldenClustering(Dataset<? extends Instance> dataset) {
         SortedSet set = dataset.getClasses();
         Clustering golden = Clusterings.newList();
 
@@ -346,6 +357,10 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         c.weightx = c.weighty = 1.0; //ratio for filling the frame space
         gbl.setConstraints((Component) viewer, c);
         this.add((Component) view, c);
+    }
+
+    public ScatterPlot getViewer() {
+        return viewer;
     }
 
     @Override

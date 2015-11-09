@@ -56,7 +56,7 @@ public class ImgGen {
             System.out.println("rendering " + name);
             plot.setClustering(scatter.goldenClustering(d));
             plot.repaint();
-            File file = new File(workDir(params, cat) + File.separatorChar + safeName(name) + ".png");
+            File file = new File(workDir(params, cat) + File.separatorChar + safeName(name) + "." + params.format);
             plot.saveFile(file, params.format);
         }
 

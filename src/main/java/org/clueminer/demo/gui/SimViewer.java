@@ -34,13 +34,12 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.SortedSet;
 import javax.swing.JPanel;
 import static org.clueminer.chameleon.Chameleon.BISECTION;
 import static org.clueminer.chameleon.Chameleon.MERGER;
@@ -53,7 +52,6 @@ import org.clueminer.chameleon.mo.PairMergerMO;
 import org.clueminer.chameleon.similarity.BBK1;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
-import org.clueminer.clustering.api.EvaluationTable;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.MergeEvaluation;
 import org.clueminer.clustering.api.dendrogram.ColorScheme;
@@ -65,8 +63,7 @@ import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import static org.clueminer.demo.gui.AbstractClusteringViewer.RP;
 import org.clueminer.dendrogram.DataProviderMap;
-import org.clueminer.eval.utils.HashEvaluationTable;
-import org.clueminer.graph.GraphBuilder.KNNGraphBuilder;
+import org.clueminer.graph.knn.KNNGraphBuilder;
 import org.clueminer.graph.adjacencyList.AdjListGraph;
 import org.clueminer.graph.api.Graph;
 import org.clueminer.graph.api.Node;
@@ -111,6 +108,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private PriorityQueue<PairValue<GraphCluster<E>>> pq;
     private ColorScheme colorScheme;
     private double min, max, mid;
+    private int total;
+
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
     }
@@ -177,7 +176,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             @Override
             public void run() {
                 fireClusteringStarted(dataset, params);
-                clust = goldenClustering(dataset);
+                //clust = goldenClustering(dataset);
+                if (pq != null) {
+                    clust = partitionedClustering(pq);
+                }
 
             }
 
@@ -185,45 +187,36 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         task.addTaskListener(this);
     }
 
-    public Clustering goldenClustering(Dataset<? extends Instance> dataset) {
-        SortedSet set = dataset.getClasses();
-        Clustering golden = Clusterings.newList();
+    private Clustering partitionedClustering(PriorityQueue pq) {
+        Clustering clustering = Clusterings.newList();
 
-        EvaluationTable evalTable = new HashEvaluationTable(golden, dataset);
-        golden.lookupAdd(evalTable);
-        HashMap<Object, Integer> map = new HashMap<>(set.size());
-        Object obj;
-        Iterator it = set.iterator();
-        int i = 0;
-        Cluster c;
+        Iterator<PairValue<GraphCluster<E>>> iter = pq.iterator();
+        PairValue<GraphCluster<E>> elem;
+
+        HashSet<Integer> blacklist = new HashSet<>();
         cg.reset();
-        int avgSize = (int) Math.sqrt(dataset.size());
-        while (it.hasNext()) {
-            obj = it.next();
-            c = golden.createCluster(i, avgSize, obj.toString());
-            c.setAttributes(dataset.getAttributes());
-            c.setColor(cg.next());
-            map.put(obj, i++);
+        total = 0;
+        while (iter.hasNext()) {
+            elem = iter.next();
+            processCluster(clustering, elem.A, blacklist);
+            processCluster(clustering, elem.B, blacklist);
         }
+        System.out.println("total points: " + total);
 
-        int assign;
+        return clustering;
+    }
 
-        Object klass;
-        for (Instance inst : dataset) {
-            if (map.containsKey(inst.classValue())) {
-                assign = map.get(inst.classValue());
-                c = golden.get(assign);
-            } else {
-                c = golden.createCluster(i);
-                c.setAttributes(dataset.getAttributes());
-                klass = inst.classValue();
-                map.put(klass, i++);
+    private void processCluster(Clustering clustering, GraphCluster<E> cluster, HashSet<Integer> blacklist) {
+        //Cluster clust;
+        if (!blacklist.contains(cluster.getClusterId())) {
+            //  clust = clustering.createCluster();
+            if (cg != null) {
+                cluster.setColor(cg.next());
             }
-            c.add(inst);
+            clustering.add(cluster);
+            total += cluster.size();
+            blacklist.add(cluster.getClusterId());
         }
-        golden.lookupAdd(dataset);
-
-        return golden;
     }
 
     @Override
@@ -296,8 +289,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             PairValue<GraphCluster<E>> elem;
             while (iter.hasNext()) {
                 elem = iter.next();
-                source = translate(elem.A.get(0));
-                target = translate(elem.B.get(0));
+                source = translate(elem.A.getCentroid());
+                //source = translate(elem.A.get(0));
+                target = translate(elem.B.getCentroid());
+                //target = translate(elem.B.get(0));
                 //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
                 drawLine(g2, source, target, elem.getValue());
             }
@@ -346,8 +341,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         }
         hasData = false;
         int datasetK = determineK(dataset);
+        System.out.println("dataset size: " + dataset.size());
         System.out.println("computing knn(" + datasetK + ")");
         graph = new AdjListGraph();
+        graph.lookupAdd(dataset);
         graph = knn.getNeighborGraph(dataset, graph, datasetK);
 
         //bisection = pref.get(BISECTION, "Kernighan-Lin");

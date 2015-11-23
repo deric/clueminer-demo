@@ -25,7 +25,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -244,8 +243,6 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     }
 
     public void render(Graphics2D g2) {
-        Insets insets = getInsets();
-
         if (drawing) {
             g2.setColor(DRAWING_RECT_COLOR);
             g2.draw(rect);
@@ -402,7 +399,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
         @Override
         public void mouseClicked(MouseEvent e) {
-
+            System.out.println("mouse clicked " + e.toString());
         }
 
         @Override

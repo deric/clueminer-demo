@@ -34,6 +34,7 @@ import org.clueminer.demo.gui.ViewerSettings;
  */
 public class SimViz extends BaseFrame {
 
+    private static final long serialVersionUID = -7539640234381467820L;
     private SimViewer plot;
     private ViewerSettings settings;
     private boolean showDendro = true;

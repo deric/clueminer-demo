@@ -35,10 +35,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.SortedSet;
@@ -115,6 +112,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private ColorScheme colorScheme;
     private double min, max, mid;
     private int total;
+    private Merger merger;
+    private int alpha;
 
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -183,8 +182,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             public void run() {
                 fireClusteringStarted(dataset, params);
                 //clust = goldenClustering(dataset);
-                if (pq != null) {
-                    clust = partitionedClustering(pq);
+                if (hasData && merger != null) {
+                    clust = partitionedClustering(merger);
                 }
 
             }
@@ -193,36 +192,22 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         task.addTaskListener(this);
     }
 
-    private Clustering partitionedClustering(PriorityQueue pq) {
+    private Clustering partitionedClustering(Merger<E> m) {
         Clustering clustering = Clusterings.newList();
 
-        Iterator<PairValue<GraphCluster<E>>> iter = pq.iterator();
-        PairValue<GraphCluster<E>> elem;
-
-        HashSet<Integer> blacklist = new HashSet<>();
         cg.reset();
         total = 0;
-        while (iter.hasNext()) {
-            elem = iter.next();
-            processCluster(clustering, elem.A, blacklist);
-            processCluster(clustering, elem.B, blacklist);
-        }
-        System.out.println("total points: " + total);
-
-        return clustering;
-    }
-
-    private void processCluster(Clustering clustering, GraphCluster<E> cluster, HashSet<Integer> blacklist) {
-        //Cluster clust;
-        if (!blacklist.contains(cluster.getClusterId())) {
+        for (Cluster<E> cluster : m.getClusters()) {
             //  clust = clustering.createCluster();
             if (cg != null) {
                 cluster.setColor(cg.next());
             }
             clustering.add(cluster);
             total += cluster.size();
-            blacklist.add(cluster.getClusterId());
         }
+        System.out.println("total points: " + total);
+
+        return clustering;
     }
 
     @Override
@@ -321,7 +306,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     private void drawLine(Graphics2D g, Point2D source, Point2D target, double value) {
         if (value > 0) {
-            g.setColor(colorScheme.getColor(value, min, mid, max));
+            g.setColor(colorScheme.getColor(value, min, mid, max, alpha));
             //System.out.println("val: " + value + ", " + colorScheme.getColor(value, min, mid, max));
             g.draw(new Line2D.Double(source.getX(), source.getY(), target.getX(), target.getY()));
         }
@@ -406,6 +391,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         graph = new AdjListGraph();
         graph.lookupAdd(dataset);
         graph = knn.getNeighborGraph(dataset, graph, datasetK);
+        alpha = pref.getInt("alpha", 255);
 
         //bisection = pref.get(BISECTION, "Kernighan-Lin");
         String bisection = pref.get(BISECTION, "Fiduccia-Mattheyses");
@@ -421,28 +407,29 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             Partitioning partitioningAlg = new RecursiveBisection(bisectionAlg);
             partitioningAlg.setBisection(bisectionAlg);
             int maxPartitionSize = pref.getInt(Chameleon.MAX_PARTITION, determineMaxPartitionSize(dataset));
-            ArrayList<LinkedList<Node>> partitioningResult = partitioningAlg.partition(maxPartitionSize, graph, pref);
+            System.out.println("max. partition = " + maxPartitionSize);
+            ArrayList<ArrayList<Node>> partitioningResult = partitioningAlg.partition(maxPartitionSize, graph, pref);
 
-            String merger = pref.get(MERGER, "pair merger");
-            Merger m = MergerFactory.getInstance().getProvider(merger);
+            String mergerMth = pref.get(MERGER, "pair merger");
+            merger = MergerFactory.getInstance().getProvider(mergerMth);
 
-            List<E> noise = null;
+            ArrayList<E> noise = null;
 
-            m.initialize(partitioningResult, graph, bisectionAlg, pref, noise);
+            merger.initialize(partitioningResult, graph, bisectionAlg, pref, noise);
 
             MergeEvaluationFactory mef = MergeEvaluationFactory.getInstance();
-            if (m instanceof PairMerger) {
+            if (merger instanceof PairMerger) {
                 String similarityMeasure = pref.get(SIM_MEASURE, BBK1.name);
                 MergeEvaluation me = mef.getProvider(similarityMeasure);
-                ((PairMerger) m).setMergeEvaluation(me);
-            } else if (m instanceof PairMergerMO) {
-                PairMergerMO mo = (PairMergerMO) m;
+                ((PairMerger) merger).setMergeEvaluation(me);
+            } else if (merger instanceof PairMergerMO) {
+                PairMergerMO mo = (PairMergerMO) merger;
                 mo.clearObjectives();
                 mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_1)));
                 mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_2)));
             }
 
-            pq = m.getQueue(pref);
+            pq = merger.getQueue(pref);
             PairValue<GraphCluster<E>> head = pq.peek();
             max = head.getValue();
             mid = head.getValue() / 2.0;
@@ -452,7 +439,6 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             System.out.println("queue: " + pq.size());
             hasData = true;
         } else {
-            pq = null;
             clust = goldenClustering(dataset);
         }
         validate();

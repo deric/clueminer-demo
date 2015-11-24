@@ -38,6 +38,7 @@ public class PartitionSettings extends JPanel {
     private JTextField tfK;
     private JCheckBox chckAutoK;
     private JTextField tfMaxP;
+    private JTextField tfAlpha;
     private JCheckBox chckAutoMaxP;
     private JCheckBox chckPartition;
     private JComboBox comboSimilarity;
@@ -106,6 +107,14 @@ public class PartitionSettings extends JPanel {
         chckPartition = new JCheckBox("run partitioning", true);
         add(chckPartition, c);
 
+        c.gridy++;
+        c.gridx = 0;
+        tfAlpha = new JTextField("255", 10);
+        add(new JLabel("alpha:"), c);
+        c.gridx = 1;
+        c.weightx = 0.9;
+        add(tfAlpha, c);
+
     }
 
     public Props getParams() {
@@ -120,6 +129,7 @@ public class PartitionSettings extends JPanel {
         if (!chckPartition.isSelected()) {
             props.put("skip_partition", true);
         }
+        props.putInt("alpha", Integer.valueOf(tfAlpha.getText()));
 
         return props;
     }

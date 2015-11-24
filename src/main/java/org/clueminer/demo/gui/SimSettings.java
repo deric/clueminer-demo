@@ -47,11 +47,11 @@ public class SimSettings<E extends Instance, C extends Cluster<E>> extends JPane
 
     private JComboBox dataBox;
     private JButton btnSettings;
-    private final DatasetViewer panel;
+    private final SimViewer panel;
     private PartitionSettings partitionPanel;
     protected final transient EventListenerList controlListeners = new EventListenerList();
 
-    public SimSettings(DatasetViewer panel, StatusPanel status) {
+    public SimSettings(SimViewer panel, StatusPanel status) {
         this.panel = panel;
         panel.addClusteringListener(this);
         controlListeners.add(ControlListener.class, status);
@@ -89,6 +89,7 @@ public class SimSettings<E extends Instance, C extends Cluster<E>> extends JPane
                 //exportDialog.destroy();
 
                 if (dd.getValue() == DialogDescriptor.OK_OPTION) {
+                    panel.computeNN(panel.getDataset(), getProps());
                     execute();
                 }
             }

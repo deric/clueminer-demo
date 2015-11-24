@@ -34,12 +34,14 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.SortedSet;
 import javax.swing.JPanel;
 import org.clueminer.chameleon.Chameleon;
 import static org.clueminer.chameleon.Chameleon.BISECTION;
@@ -53,6 +55,7 @@ import org.clueminer.chameleon.mo.PairMergerMO;
 import org.clueminer.chameleon.similarity.BBK1;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
+import org.clueminer.clustering.api.EvaluationTable;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.MergeEvaluation;
 import org.clueminer.clustering.api.dendrogram.ColorScheme;
@@ -64,7 +67,9 @@ import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import static org.clueminer.demo.gui.AbstractClusteringViewer.RP;
 import org.clueminer.dendrogram.DataProviderMap;
+import org.clueminer.eval.utils.HashEvaluationTable;
 import org.clueminer.graph.adjacencyList.AdjListGraph;
+import org.clueminer.graph.api.Edge;
 import org.clueminer.graph.api.Graph;
 import org.clueminer.graph.api.Node;
 import org.clueminer.graph.knn.KNNGraphBuilder;
@@ -171,7 +176,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
      */
     @Override
     public void execute(final Props params) {
-
+        pref = params;
         task = RP.post(new Runnable() {
 
             @Override
@@ -261,6 +266,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     public void paint(Graphics g) {
         super.paint(g);
         render((Graphics2D) g);
+        revalidate();
     }
 
     public void render(Graphics2D g2) {
@@ -282,10 +288,9 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
         //draw selection
         g2.setColor(Color.RED);
+        Point2D source, target;
 
         if (dataset != null && hasData) {
-            Point2D source, target;
-
             Iterator<PairValue<GraphCluster<E>>> iter = pq.iterator();
             PairValue<GraphCluster<E>> elem;
             while (iter.hasNext()) {
@@ -296,6 +301,15 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 //target = translate(elem.B.get(0));
                 //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
                 drawLine(g2, source, target, elem.getValue());
+            }
+        } else if (graph != null) {
+            for (Edge e : graph.getEdges()) {
+                source = translate((E) e.getSource().getInstance());
+                //source = translate(elem.A.get(0));
+                target = translate((E) e.getTarget().getInstance());
+                //target = translate(elem.B.get(0));
+                //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
+                drawLine(g2, source, target, e.getWeight());
             }
         }
 
@@ -325,6 +339,47 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         return viewer.posOnCanvas(inst.get(0), inst.get(1));
     }
 
+    public Clustering goldenClustering(Dataset<? extends Instance> dataset) {
+        SortedSet set = dataset.getClasses();
+        Clustering golden = Clusterings.newList();
+
+        EvaluationTable evalTable = new HashEvaluationTable(golden, dataset);
+        golden.lookupAdd(evalTable);
+        HashMap<Object, Integer> map = new HashMap<>(set.size());
+        Object obj;
+        Iterator it = set.iterator();
+        int i = 0;
+        Cluster c;
+        cg.reset();
+        int avgSize = (int) Math.sqrt(dataset.size());
+        while (it.hasNext()) {
+            obj = it.next();
+            c = golden.createCluster(i, avgSize, obj.toString());
+            c.setAttributes(dataset.getAttributes());
+            c.setColor(cg.next());
+            map.put(obj, i++);
+        }
+
+        int assign;
+
+        Object klass;
+        for (Instance inst : dataset) {
+            if (map.containsKey(inst.classValue())) {
+                assign = map.get(inst.classValue());
+                c = golden.get(assign);
+            } else {
+                c = golden.createCluster(i);
+                c.setAttributes(dataset.getAttributes());
+                klass = inst.classValue();
+                map.put(klass, i++);
+            }
+            c.add(inst);
+        }
+        golden.lookupAdd(dataset);
+
+        return golden;
+    }
+
     @Override
     public void datasetChanged(Dataset<E> dataset) {
         //eventuall switch to 3D
@@ -340,6 +395,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             }
             mode2d = true;
         }
+        computeNN(dataset, pref);
+    }
+
+    public void computeNN(Dataset<E> dataset, Props pref) {
         hasData = false;
         int datasetK = pref.getInt(Chameleon.K, determineK(dataset));
         System.out.println("dataset size: " + dataset.size());
@@ -355,11 +414,12 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             FiducciaMattheyses fm = (FiducciaMattheyses) bisectionAlg;
             fm.setIterationLimit(pref.getInt(FiducciaMattheyses.ITERATIONS, 20));
         }
+        System.out.println(pref.toString());
 
-        //String partitioning = pref.get(PARTITIONING, "Recursive bisection");
-        Partitioning partitioningAlg = new RecursiveBisection(bisectionAlg);
-        partitioningAlg.setBisection(bisectionAlg);
         if (!pref.containsKey("skip_partition")) {
+            //String partitioning = pref.get(PARTITIONING, "Recursive bisection");
+            Partitioning partitioningAlg = new RecursiveBisection(bisectionAlg);
+            partitioningAlg.setBisection(bisectionAlg);
             int maxPartitionSize = pref.getInt(Chameleon.MAX_PARTITION, determineMaxPartitionSize(dataset));
             ArrayList<LinkedList<Node>> partitioningResult = partitioningAlg.partition(maxPartitionSize, graph, pref);
 
@@ -390,8 +450,14 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
             System.out.println("head: " + head.getValue());
             System.out.println("queue: " + pq.size());
+            hasData = true;
+        } else {
+            pq = null;
+            clust = goldenClustering(dataset);
         }
-        hasData = true;
+        validate();
+        revalidate();
+        repaint();
     }
 
     private int determineK(Dataset<E> dataset) {

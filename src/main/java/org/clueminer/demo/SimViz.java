@@ -24,9 +24,9 @@ import javax.swing.SwingUtilities;
 import org.clueminer.data.DataLoader;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.demo.gui.DendroWrapper;
+import org.clueminer.demo.gui.SimSettings;
 import org.clueminer.demo.gui.SimViewer;
 import org.clueminer.demo.gui.StatusPanel;
-import org.clueminer.demo.gui.ViewerSettings;
 
 /**
  *
@@ -36,7 +36,7 @@ public class SimViz extends BaseFrame {
 
     private static final long serialVersionUID = -7539640234381467820L;
     private SimViewer plot;
-    private ViewerSettings settings;
+    private SimSettings settings;
     private boolean showDendro = true;
     private DendroWrapper dendro;
 
@@ -85,7 +85,7 @@ public class SimViz extends BaseFrame {
         c.weightx = c.weighty = 0.2; //no fill while resize
 
         status = new StatusPanel(plot);
-        settings = new ViewerSettings<>(plot, status);
+        settings = new SimSettings<>(plot, status);
         gbl.setConstraints(settings, c);
         add(settings, c);
         //status bar

@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import javax.swing.JPanel;
+import org.clueminer.chameleon.Chameleon;
 import static org.clueminer.chameleon.Chameleon.BISECTION;
 import static org.clueminer.chameleon.Chameleon.MERGER;
 import static org.clueminer.chameleon.Chameleon.OBJECTIVE_1;
@@ -63,10 +64,10 @@ import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import static org.clueminer.demo.gui.AbstractClusteringViewer.RP;
 import org.clueminer.dendrogram.DataProviderMap;
-import org.clueminer.graph.knn.KNNGraphBuilder;
 import org.clueminer.graph.adjacencyList.AdjListGraph;
 import org.clueminer.graph.api.Graph;
 import org.clueminer.graph.api.Node;
+import org.clueminer.graph.knn.KNNGraphBuilder;
 import org.clueminer.partitioning.api.Bisection;
 import org.clueminer.partitioning.api.BisectionFactory;
 import org.clueminer.partitioning.api.Merger;
@@ -340,7 +341,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             mode2d = true;
         }
         hasData = false;
-        int datasetK = determineK(dataset);
+        int datasetK = pref.getInt(Chameleon.K, determineK(dataset));
         System.out.println("dataset size: " + dataset.size());
         System.out.println("computing knn(" + datasetK + ")");
         graph = new AdjListGraph();
@@ -358,36 +359,38 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         //String partitioning = pref.get(PARTITIONING, "Recursive bisection");
         Partitioning partitioningAlg = new RecursiveBisection(bisectionAlg);
         partitioningAlg.setBisection(bisectionAlg);
-        int maxPartitionSize = determineMaxPartitionSize(dataset);
-        ArrayList<LinkedList<Node>> partitioningResult = partitioningAlg.partition(maxPartitionSize, graph, pref);
+        if (!pref.containsKey("skip_partition")) {
+            int maxPartitionSize = pref.getInt(Chameleon.MAX_PARTITION, determineMaxPartitionSize(dataset));
+            ArrayList<LinkedList<Node>> partitioningResult = partitioningAlg.partition(maxPartitionSize, graph, pref);
 
-        String merger = pref.get(MERGER, "pair merger");
-        Merger m = MergerFactory.getInstance().getProvider(merger);
+            String merger = pref.get(MERGER, "pair merger");
+            Merger m = MergerFactory.getInstance().getProvider(merger);
 
-        List<E> noise = null;
+            List<E> noise = null;
 
-        m.initialize(partitioningResult, graph, bisectionAlg, pref, noise);
+            m.initialize(partitioningResult, graph, bisectionAlg, pref, noise);
 
-        MergeEvaluationFactory mef = MergeEvaluationFactory.getInstance();
-        if (m instanceof PairMerger) {
-            String similarityMeasure = pref.get(SIM_MEASURE, BBK1.name);
-            MergeEvaluation me = mef.getProvider(similarityMeasure);
-            ((PairMerger) m).setMergeEvaluation(me);
-        } else if (m instanceof PairMergerMO) {
-            PairMergerMO mo = (PairMergerMO) m;
-            mo.clearObjectives();
-            mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_1)));
-            mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_2)));
+            MergeEvaluationFactory mef = MergeEvaluationFactory.getInstance();
+            if (m instanceof PairMerger) {
+                String similarityMeasure = pref.get(SIM_MEASURE, BBK1.name);
+                MergeEvaluation me = mef.getProvider(similarityMeasure);
+                ((PairMerger) m).setMergeEvaluation(me);
+            } else if (m instanceof PairMergerMO) {
+                PairMergerMO mo = (PairMergerMO) m;
+                mo.clearObjectives();
+                mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_1)));
+                mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_2)));
+            }
+
+            pq = m.getQueue(pref);
+            PairValue<GraphCluster<E>> head = pq.peek();
+            max = head.getValue();
+            mid = head.getValue() / 2.0;
+            min = head.getValue() / 10.0;
+
+            System.out.println("head: " + head.getValue());
+            System.out.println("queue: " + pq.size());
         }
-
-        pq = m.getQueue(pref);
-        PairValue<GraphCluster<E>> head = pq.peek();
-        max = head.getValue();
-        mid = head.getValue() / 2.0;
-        min = head.getValue() / 10.0;
-
-        System.out.println("head: " + head.getValue());
-        System.out.println("queue: " + pq.size());
         hasData = true;
     }
 

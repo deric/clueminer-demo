@@ -305,8 +305,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     }
 
     private void drawLine(Graphics2D g, Point2D source, Point2D target, double value) {
+        Color c;
         if (value > 0) {
-            g.setColor(colorScheme.getColor(value, min, mid, max, alpha));
+            c = colorScheme.getColor(value, min, mid, max);
+            g.setColor(new Color(c.getRed(), c.getBlue(), c.getGreen(), alpha));
             //System.out.println("val: " + value + ", " + colorScheme.getColor(value, min, mid, max));
             g.draw(new Line2D.Double(source.getX(), source.getY(), target.getX(), target.getY()));
         }

@@ -22,7 +22,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.api.Algorithm;
 import org.clueminer.clustering.api.Cluster;
@@ -57,8 +56,7 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
     private JButton btnExport;
     private JButton btnApply;
     protected final transient EventListenerList controlListeners = new EventListenerList();
-    private JToggleButton btnNoise;
-    private boolean generateNoise = false;
+    private JButton btnNoise;
 
     public ViewerSettings(DatasetViewer panel, StatusPanel status) {
         this.panel = panel;
@@ -124,12 +122,12 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
                 }
             }
         });
-        btnNoise = new JToggleButton("add noise");
+        btnNoise = new JButton("update dataset");
         btnNoise.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                generateNoise = !generateNoise;
+                execute();
             }
         });
         add(btnNoise);

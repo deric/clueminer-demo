@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import javax.swing.JPanel;
+import org.clueminer.clustering.api.Algorithm;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.EvaluationTable;
@@ -78,7 +79,6 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     private Point startDrag;
     protected Dimension reqSize = new Dimension(0, 0);
     private Shape selection;
-
     private static final Color DRAWING_RECT_COLOR = new Color(200, 200, 255);
     private Rectangle rect = null;
     private boolean drawing = false;
@@ -399,7 +399,16 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            System.out.println("mouse clicked " + e.toString());
+            double[] pos = viewer.translate(e.getPoint());
+            E inst = dataset.builder().create(pos);
+            inst.setClassValue(Algorithm.OUTLIER_LABEL);
+            try {
+                kdTree.insert(pos, inst);
+            } catch (KeySizeException | KeyDuplicateException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            System.out.println("data size: " + dataset.size());
+            //System.out.println("[" + pos[0] + ", " + pos[1] + "]");
         }
 
         @Override

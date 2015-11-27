@@ -112,7 +112,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private ColorScheme colorScheme;
     private double min, max, mid;
     private int total;
-    private Merger merger;
+    private Merger<E> merger;
     private int alpha;
 
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
@@ -278,6 +278,11 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         if (dataset != null && hasData) {
             Iterator<PairValue<GraphCluster<E>>> iter = pq.iterator();
             PairValue<GraphCluster<E>> elem;
+
+            double edgeMin = Double.MAX_VALUE;
+            double edgeMax = Double.MIN_VALUE;
+            double value;
+
             while (iter.hasNext()) {
                 elem = iter.next();
                 source = translate(elem.A.getCentroid());
@@ -285,9 +290,28 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 target = translate(elem.B.getCentroid());
                 //target = translate(elem.B.get(0));
                 //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
-                drawLine(g2, source, target, elem.getValue());
+                value = elem.getValue();
+                drawLine(g2, source, target, value);
+
+                if (value > edgeMax) {
+                    edgeMax = value;
+                }
+                if (value > 0 && value < edgeMin) {
+                    edgeMin = value;
+                }
             }
+
+            max = edgeMax;
+            mid = (edgeMax - edgeMin) / 2.0;
+            min = edgeMin;
+            /*System.out.println("==== partition");
+             System.out.println("min = " + min);
+            System.out.println("mid = " + mid);
+            System.out.println("max = " + max);*/
         } else if (graph != null) {
+            double edgeMin = Double.MAX_VALUE;
+            double edgeMax = Double.MIN_VALUE;
+
             for (Edge e : graph.getEdges()) {
                 source = translate((E) e.getSource().getInstance());
                 //source = translate(elem.A.get(0));
@@ -295,8 +319,28 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 //target = translate(elem.B.get(0));
                 //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
                 drawLine(g2, source, target, e.getWeight());
+
+                if (e.getWeight() > edgeMax) {
+                    edgeMax = e.getWeight();
+                }
+                if (e.getWeight() > 0 && e.getWeight() < edgeMin) {
+                    edgeMin = e.getWeight();
+                }
             }
+            /*     System.out.println("=====edges ");
+             max = edgeMax;
+            mid = (edgeMax - edgeMin) / 2.0;
+            min = edgeMin;
+            System.out.println("min = " + min);
+            System.out.println("mid = " + mid);
+            System.out.println("max = " + max);*/
         }
+
+        /*if (merger != null) {
+         g2.setColor(Color.PINK);            for (Cluster<E> cluster : merger.getClusters()) {
+                drawCircle(g2, translate((E) cluster.get(0)), stroke, 4);
+            }
+        }*/
 
         //Area fill = new Area(new Rectangle(new Point(0, 0), getSize()));
         //g2.fill(fill);
@@ -308,7 +352,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         Color c;
         if (value > 0) {
             c = colorScheme.getColor(value, min, mid, max);
-            g.setColor(new Color(c.getRed(), c.getBlue(), c.getGreen(), alpha));
+            //g.setColor(c);
+            g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha));
             //System.out.println("val: " + value + ", " + colorScheme.getColor(value, min, mid, max));
             g.draw(new Line2D.Double(source.getX(), source.getY(), target.getX(), target.getY()));
         }
@@ -410,14 +455,12 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             partitioningAlg.setBisection(bisectionAlg);
             int maxPartitionSize = pref.getInt(Chameleon.MAX_PARTITION, determineMaxPartitionSize(dataset));
             System.out.println("max. partition = " + maxPartitionSize);
-            ArrayList<ArrayList<Node>> partitioningResult = partitioningAlg.partition(maxPartitionSize, graph, pref);
+            ArrayList<ArrayList<Node<E>>> partitioningResult = partitioningAlg.partition(maxPartitionSize, graph, pref);
 
             String mergerMth = pref.get(MERGER, "pair merger");
             merger = MergerFactory.getInstance().getProvider(mergerMth);
 
             ArrayList<E> noise = null;
-
-            merger.initialize(partitioningResult, graph, bisectionAlg, pref, noise);
 
             MergeEvaluationFactory mef = MergeEvaluationFactory.getInstance();
             if (merger instanceof PairMerger) {
@@ -430,14 +473,28 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_1)));
                 mo.addObjective(mef.getProvider(pref.get(OBJECTIVE_2)));
             }
+            merger.initialize(partitioningResult, graph, bisectionAlg, pref, noise);
 
+            /*    double edgeMin = Double.MAX_VALUE;
+             double edgeMax = Double.MIN_VALUE;
+             for (Edge e : graph.getEdges()) {
+             if (e.getWeight() > edgeMax) {
+             edgeMax = e.getWeight();
+             }
+             if (e.getWeight() > 0 && e.getWeight() < edgeMin) {
+             edgeMin = e.getWeight();
+             }
+             }*/
             pq = merger.getQueue(pref);
-            PairValue<GraphCluster<E>> head = pq.peek();
-            max = head.getValue();
-            mid = head.getValue() / 2.0;
-            min = head.getValue() / 10.0;
+            /*   //PairValue<GraphCluster<E>> head = pq.peek();
+             max = edgeMax;
+             mid = (edgeMax - edgeMin) / 2.0;
+             min = edgeMin;
 
-            System.out.println("head: " + head.getValue());
+             System.out.println("min = " + min);
+             System.out.println("mid = " + mid);
+             System.out.println("max = " + max);*/
+
             System.out.println("queue: " + pq.size());
             hasData = true;
         } else {

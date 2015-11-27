@@ -306,8 +306,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             min = edgeMin;
             /*System.out.println("==== partition");
              System.out.println("min = " + min);
-            System.out.println("mid = " + mid);
-            System.out.println("max = " + max);*/
+             System.out.println("mid = " + mid);
+             System.out.println("max = " + max);*/
         } else if (graph != null) {
             double edgeMin = Double.MAX_VALUE;
             double edgeMax = Double.MIN_VALUE;
@@ -329,23 +329,34 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             }
             /*     System.out.println("=====edges ");
              max = edgeMax;
-            mid = (edgeMax - edgeMin) / 2.0;
-            min = edgeMin;
-            System.out.println("min = " + min);
-            System.out.println("mid = " + mid);
-            System.out.println("max = " + max);*/
+             mid = (edgeMax - edgeMin) / 2.0;
+             min = edgeMin;
+             System.out.println("min = " + min);
+             System.out.println("mid = " + mid);
+             System.out.println("max = " + max);*/
         }
 
-        /*if (merger != null) {
-         g2.setColor(Color.PINK);            for (Cluster<E> cluster : merger.getClusters()) {
-                drawCircle(g2, translate((E) cluster.get(0)), stroke, 4);
+        if (merger != null) {
+            g2.setColor(Color.ORANGE);
+            for (Cluster<E> cluster : merger.getClusters()) {
+                if (cluster.size() == 1) {
+                    //drawCircle(g2, translate((E) cluster.get(0)), stroke, 4);
+                    drawCross(g2, translate(cluster.get(0)), stroke, 15, Color.BLACK);
+                }
             }
-        }*/
-
+        }
         //Area fill = new Area(new Rectangle(new Point(0, 0), getSize()));
         //g2.fill(fill);
         //g2.draw(selection);
         g2.dispose();
+    }
+
+    private void drawCross(Graphics2D g, Point2D point, Stroke stroke, int diameter, Color color) {
+        g.setColor(color);
+        g.draw(new Line2D.Double(point.getX() - diameter, point.getY() + diameter, point.getX() + diameter, point.getY() - diameter));
+        g.draw(new Line2D.Double(point.getX() - diameter, point.getY() - diameter, point.getX() + diameter, point.getY() + diameter));
+        drawCircle(g, point, stroke, 6);
+
     }
 
     private void drawLine(Graphics2D g, Point2D source, Point2D target, double value) {
@@ -432,6 +443,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     public void computeNN(Dataset<E> dataset, Props pref) {
         hasData = false;
+        merger = null;
         int datasetK = pref.getInt(Chameleon.K, determineK(dataset));
         System.out.println("dataset size: " + dataset.size());
         System.out.println("computing knn(" + datasetK + ")");

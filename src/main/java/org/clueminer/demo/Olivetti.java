@@ -113,9 +113,9 @@ public class Olivetti extends BaseFrame {
                 int y = 0;
                 int mod;
                 for (int j = 0; j < cntImages; j++) {
-                    mod = j % 10;
+                    mod = j % 20;
                     g.drawImage(createImg(width, height, images[j]), mod * width, y * height, null);
-                    if (mod == 9) {
+                    if (mod == 19) {
                         y++;
                     }
                 }
@@ -128,25 +128,6 @@ public class Olivetti extends BaseFrame {
         setVisible(true);
     }
 
-    private BufferedImage image(String[] bytes) {
-        int width = getSize().width;
-        int height = getSize().height;
-        int[] data = new int[width * height];
-        int i = 0;
-        for (int y = 0; y < height; y++) {
-            int red = (y * 255) / (height - 1);
-            for (int x = 0; x < width; x++) {
-                int green = (x * 255) / (width - 1);
-                int blue = 128;
-                data[i++] = (red << 16) | (green << 8) | blue;
-            }
-        }
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        image.setRGB(0, 0, width, height, data, 0, width);
-
-        return image;
-    }
-
     private BufferedImage createImg(int width, int height, int[] data) {
         ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
         ColorConvertOp op = new ColorConvertOp(cs, null);
@@ -157,7 +138,7 @@ public class Olivetti extends BaseFrame {
         int pos;
 
         WritableRaster raster = img.getRaster();
-        double val;
+        //double val;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 pos = (j * width) + i;

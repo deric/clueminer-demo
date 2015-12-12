@@ -20,6 +20,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.data.DataLoader;
@@ -108,13 +109,21 @@ public class Demo2D extends BaseFrame {
             dendro = new DendroWrapper<>(plot, status);
             plot.addClusteringListener(dendro);
             c.gridx = 1;
-            add(dendro, c);
+
+            JSplitPane splitPane = new JSplitPane();
+            splitPane.setOneTouchExpandable(true);
+            splitPane.setDividerLocation(700);
+            splitPane.setLeftComponent(plot);
+
+            splitPane.setRightComponent(dendro);
+            c.gridx = 0;
+            add(splitPane, c);
         } else {
+            c.gridx = 0;
             c.weightx = 0.8; //ratio for filling the frame space
+            gbl.setConstraints((Component) plot, c);
+            this.add((Component) plot, c);
         }
-        c.gridx = 0;
-        gbl.setConstraints((Component) plot, c);
-        this.add((Component) plot, c);
         setVisible(true);
     }
 

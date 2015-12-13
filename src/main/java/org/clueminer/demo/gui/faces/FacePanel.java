@@ -22,6 +22,8 @@ import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.awt.image.WritableRaster;
+import org.clueminer.dataset.plugin.ArrayDataset;
+import org.clueminer.dataset.row.IntegerDataRow;
 import org.clueminer.gui.BPanel;
 
 /**
@@ -32,16 +34,16 @@ import org.clueminer.gui.BPanel;
 public class FacePanel extends BPanel {
 
     private static final long serialVersionUID = 2144561337674137421L;
-    private final int[][] images;
+    private final ArrayDataset<IntegerDataRow> images;
     private final int width = 64;
     private final int height = 64;
     private final int cntImages;
     //private static final Logger LOGGER = Logger.getLogger(FacePanel.class.getName());
     private BufferedImage[] faces;
 
-    public FacePanel(int[][] images) {
+    public FacePanel(ArrayDataset<IntegerDataRow> images) {
         this.images = images;
-        cntImages = images.length;
+        cntImages = images.size();
         faces = new BufferedImage[cntImages];
     }
 
@@ -52,7 +54,7 @@ public class FacePanel extends BPanel {
         for (int j = 0; j < cntImages; j++) {
             mod = j % 20;
             if (faces[j] == null) {
-                faces[j] = createImg(width, height, images[j]);
+                faces[j] = createImg(width, height, images.get(j));
             }
             g.drawImage(faces[j], mod * width, y * height, null);
             if (mod == 19) {
@@ -61,7 +63,7 @@ public class FacePanel extends BPanel {
         }
     }
 
-    private BufferedImage createImg(int width, int height, int[] data) {
+    private BufferedImage createImg(int width, int height, IntegerDataRow data) {
         ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
         ColorConvertOp op = new ColorConvertOp(cs, null);
 
@@ -76,7 +78,7 @@ public class FacePanel extends BPanel {
             for (int j = 0; j < width; j++) {
                 pos = (j * width) + i;
                 //val = data[pos] + (data[pos] << 8) + (data[pos] << 16);
-                raster.setSample(j, i, 0, data[pos]);
+                raster.setSample(j, i, 0, data.get(pos));
                 //raster.setSample(j, i, 0, val);
             }
         }

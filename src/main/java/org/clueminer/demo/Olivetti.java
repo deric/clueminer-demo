@@ -37,6 +37,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import org.clueminer.attributes.BasicAttrType;
+import org.clueminer.dataset.plugin.ArrayDataset;
+import org.clueminer.dataset.row.IntegerDataRow;
 import org.clueminer.demo.gui.faces.FacePanel;
 import org.openide.util.Exceptions;
 
@@ -88,18 +91,27 @@ public class Olivetti extends BaseFrame {
         final int cntImages = 400;
 
         File f = loader.resource("faces.csv");
-        final int[][] images = new int[cntImages][4096];
+        //final int[][] images = new int[cntImages][4096];
+        int attrCnt = 4096;
+        ArrayDataset<IntegerDataRow> dataset = new ArrayDataset<>(cntImages, attrCnt);
+        for (int j = 0; j < attrCnt; j++) {
+            dataset.attributeBuilder().create("attr_" + j, BasicAttrType.NUMERIC);
+        }
 
         logger.info("loading data...");
         long start = System.currentTimeMillis();
         int i = 0;
+        IntegerDataRow inst;
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
             for (String line; (line = br.readLine()) != null;) {
                 String[] bytes = line.split(",");
+                inst = new IntegerDataRow(dataset.attributeCount());
+                dataset.add(inst);
                 for (int j = 0; j < bytes.length; j++) {
-                    images[i][j] = Integer.valueOf(bytes[j]);
+                    inst.set(j, Integer.valueOf(bytes[j]));
                 }
                 i++;
+                inst.setClassValue(i);
             }
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
@@ -108,7 +120,7 @@ public class Olivetti extends BaseFrame {
         }
         logger.log(Level.INFO, "data loaded in {0}ms", (System.currentTimeMillis() - start));
 
-        panel = new FacePanel(images);
+        panel = new FacePanel(dataset);
 
         add(panel, c);
 

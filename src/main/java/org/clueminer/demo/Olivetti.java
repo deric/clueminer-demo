@@ -16,13 +16,11 @@
  */
 package org.clueminer.demo;
 
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
@@ -35,8 +33,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import org.clueminer.demo.gui.faces.FacePanel;
 import org.openide.util.Exceptions;
 
 /**
@@ -46,6 +47,7 @@ import org.openide.util.Exceptions;
 public class Olivetti extends BaseFrame {
 
     private static final long serialVersionUID = -7539640234381467820L;
+    private static final Logger logger = Logger.getLogger(Olivetti.class.getName());
     private JPanel panel;
 
     public Olivetti() {
@@ -84,12 +86,12 @@ public class Olivetti extends BaseFrame {
         ResLoader loader = new ResLoader();
 
         final int cntImages = 400;
-        final int width = 64;
-        final int height = 64;
 
         File f = loader.resource("faces.csv");
         final int[][] images = new int[cntImages][4096];
 
+        logger.info("loading data...");
+        long start = System.currentTimeMillis();
         int i = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
             for (String line; (line = br.readLine()) != null;) {
@@ -104,51 +106,13 @@ public class Olivetti extends BaseFrame {
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
+        logger.log(Level.INFO, "data loaded in {0}ms", (System.currentTimeMillis() - start));
 
-
-        panel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                int y = 0;
-                int mod;
-                for (int j = 0; j < cntImages; j++) {
-                    mod = j % 20;
-                    g.drawImage(createImg(width, height, images[j]), mod * width, y * height, null);
-                    if (mod == 19) {
-                        y++;
-                    }
-                }
-
-            }
-        };
+        panel = new FacePanel(images);
 
         add(panel, c);
 
         setVisible(true);
-    }
-
-    private BufferedImage createImg(int width, int height, int[] data) {
-        ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-        ColorConvertOp op = new ColorConvertOp(cs, null);
-
-        BufferedImage img = new BufferedImage(width, height,
-                BufferedImage.TYPE_BYTE_INDEXED);
-        img = op.filter(img, null);
-        int pos;
-
-        WritableRaster raster = img.getRaster();
-        //double val;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                pos = (j * width) + i;
-                //val = data[pos] + (data[pos] << 8) + (data[pos] << 16);
-                raster.setSample(j, i, 0, data[pos]);
-                //raster.setSample(j, i, 0, val);
-            }
-        }
-
-        return img;
     }
 
     /**

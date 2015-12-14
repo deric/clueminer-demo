@@ -72,7 +72,7 @@ public class FacePanel<E extends Instance, C extends Cluster<E>> extends BPanel 
 
             @Override
             public void run() {
-                //cg.reset();
+                cg.reset();
                 images = clustering.getLookup().lookup(Dataset.class);
                 cntImages = images.size();
                 faces = new BufferedImage[cntImages];

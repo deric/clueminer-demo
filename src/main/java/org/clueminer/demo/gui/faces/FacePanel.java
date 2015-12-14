@@ -26,43 +26,72 @@ import java.awt.image.ColorConvertOp;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
+import javax.swing.SwingUtilities;
+import org.clueminer.clustering.api.Cluster;
+import org.clueminer.clustering.api.Clustering;
 import org.clueminer.colors.ColorBrewer;
 import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.Dataset;
-import org.clueminer.dataset.row.IntegerDataRow;
+import org.clueminer.dataset.api.Instance;
 import org.clueminer.gui.BPanel;
 
 /**
  * Display dataset consisting of faces
  *
  * @author deric
+ * @param <E>
+ * @param <C>
  */
-public class FacePanel extends BPanel {
+public class FacePanel<E extends Instance, C extends Cluster<E>> extends BPanel {
 
     private static final long serialVersionUID = 2144561337674137421L;
-    private final Dataset<IntegerDataRow> images;
+    private Dataset<E> images;
     private final int width = 64;
     private final int height = 64;
-    private final int cntImages;
+    private int cntImages;
     //private static final Logger LOGGER = Logger.getLogger(FacePanel.class.getName());
     private BufferedImage[] faces;
-    private HashMap<Object, Color> colors = new HashMap<>();
+    private final HashMap<Object, Color> colors = new HashMap<>();
+    private final ColorGenerator cg;
+    private Clustering<E, C> clustering;
 
-    public FacePanel(Dataset<IntegerDataRow> images) {
+    public FacePanel(Dataset<E> images) {
         this.images = images;
         cntImages = images.size();
         faces = new BufferedImage[cntImages];
+        cg = new ColorBrewer();
+    }
+
+    public FacePanel() {
+        cg = new ColorBrewer();
+    }
+
+    public void setClustering(final Clustering<E, C> clustering) {
+        this.clustering = clustering;
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                //cg.reset();
+                cntImages = clustering.size();
+                images = clustering.getLookup().lookup(Dataset.class);
+                faces = new BufferedImage[cntImages];
+                resetCache();
+            }
+        });
     }
 
     @Override
     public void render(Graphics2D g) {
+        if (!hasData()) {
+            return;
+        }
+
         int y = 0;
         int mod;
         BufferedImage img;
-        Object cls;
-        ColorGenerator cg = new ColorBrewer();
-        colors.clear();
-        IntegerDataRow inst;
+        int cls;
+        E inst;
         for (int j = 0; j < cntImages; j++) {
             mod = j % 20;
             inst = images.get(j);
@@ -70,8 +99,13 @@ public class FacePanel extends BPanel {
                 //cache images (most expensive operation)
                 faces[j] = createImg(width, height, inst);
             }
-            cls = inst.classValue();
-            if (cls != null) {
+            if (clustering != null) {
+                cls = clustering.assignedCluster(inst.getIndex());
+            } else {
+                cls = (int) inst.classValue();
+            }
+
+            if (cls > -1) {
                 img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                 Graphics2D gr = img.createGraphics();
                 gr.drawImage(deepCopy(faces[j]), 0, 0, null);
@@ -96,7 +130,7 @@ public class FacePanel extends BPanel {
         return colors.get(klass);
     }
 
-    private BufferedImage createImg(int width, int height, IntegerDataRow data) {
+    private BufferedImage createImg(int width, int height, E data) {
         ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
         ColorConvertOp op = new ColorConvertOp(cs, null);
 

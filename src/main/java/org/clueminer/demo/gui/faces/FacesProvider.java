@@ -38,13 +38,14 @@ import org.openide.util.Exceptions;
 /**
  *
  * @author deric
+ * @param <E>
  */
-public class FacesProvider implements DataProvider {
+public class FacesProvider<E extends Instance> implements DataProvider {
 
-    private final Map<String, Dataset<? extends Instance>> datasets;
+    private final Map<String, Dataset<E>> datasets;
     private static final Logger LOGGER = Logger.getLogger(FacesProvider.class.getName());
 
-    public FacesProvider(Map<String, Dataset<? extends Instance>> data) {
+    public FacesProvider(Map<String, Dataset<E>> data) {
         this.datasets = data;
     }
 

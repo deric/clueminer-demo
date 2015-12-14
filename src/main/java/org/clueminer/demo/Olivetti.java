@@ -77,7 +77,9 @@ public class Olivetti extends BaseFrame {
         c.gridwidth = 1;
         c.weightx = c.weighty = 1.0; //no fill while resize
 
-        panel = new FacePanel(FacesProvider.createLoader().first());
+        FacesProvider fp = new FacesProvider();
+        fp.load();
+        panel = new FacePanel(fp.first());
         panel.setSize(this.getSize());
         add(panel, c);
 

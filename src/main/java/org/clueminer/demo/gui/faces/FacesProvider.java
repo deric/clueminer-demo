@@ -45,20 +45,28 @@ public class FacesProvider<E extends Instance> implements DataProvider {
     private final Map<String, Dataset<E>> datasets;
     private static final Logger LOGGER = Logger.getLogger(FacesProvider.class.getName());
 
+    public FacesProvider() {
+        datasets = new HashMap<>();
+    }
+
     public FacesProvider(Map<String, Dataset<E>> data) {
         this.datasets = data;
     }
 
-    public static DataProvider createLoader() {
+    public void load() {
+        Dataset<E> dataset = loadOlivetti(20);
+        datasets.put(dataset.getName(), dataset);
+        dataset = loadOlivetti(4096);
+        datasets.put(dataset.getName(), dataset);
+    }
+
+    private Dataset<E> loadOlivetti(int cntImages) {
         ResLoader loader = new ResLoader();
-
-        final int cntImages = 400;
-
         File f = loader.resource("faces.csv");
         //final int[][] images = new int[cntImages][4096];
         int attrCnt = 4096;
-        ArrayDataset<IntegerDataRow> dataset = new ArrayDataset<>(cntImages, attrCnt);
-        dataset.setName("olivetti");
+        ArrayDataset<E> dataset = new ArrayDataset<>(cntImages, attrCnt);
+        dataset.setName("olivetti-" + cntImages);
         for (int j = 0; j < attrCnt; j++) {
             dataset.attributeBuilder().create("attr_" + j, BasicAttrType.NUMERIC);
         }
@@ -81,6 +89,9 @@ public class FacesProvider<E extends Instance> implements DataProvider {
                     cls++;
                 }
                 i++;
+                if (i >= cntImages) {
+                    return dataset;
+                }
             }
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
@@ -88,9 +99,7 @@ public class FacesProvider<E extends Instance> implements DataProvider {
             Exceptions.printStackTrace(ex);
         }
         LOGGER.log(Level.INFO, "data loaded in {0}ms", (System.currentTimeMillis() - start));
-        Map<String, Dataset<? extends Instance>> data = new HashMap<>();
-        data.put(dataset.getName(), dataset);
-        return new FacesProvider(data);
+        return dataset;
     }
 
     @Override

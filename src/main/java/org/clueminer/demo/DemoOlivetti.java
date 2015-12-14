@@ -67,7 +67,9 @@ public class DemoOlivetti extends BaseFrame {
      * @return
      */
     private DataProvider loadDatasets() {
-        return FacesProvider.createLoader();
+        FacesProvider prov = new FacesProvider();
+        prov.load();
+        return prov;
     }
 
     private void initComponents() {

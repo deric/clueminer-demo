@@ -72,7 +72,7 @@ public class Olivetti extends BaseFrame {
     }
 
     private void initComponents() {
-        setSize(800, 600);
+        setSize(800, 800);
 
         GridBagLayout gbl = new GridBagLayout();
         setLayout(gbl);
@@ -102,6 +102,7 @@ public class Olivetti extends BaseFrame {
         long start = System.currentTimeMillis();
         int i = 0;
         IntegerDataRow inst;
+        int cls = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
             for (String line; (line = br.readLine()) != null;) {
                 String[] bytes = line.split(",");
@@ -110,8 +111,11 @@ public class Olivetti extends BaseFrame {
                 for (int j = 0; j < bytes.length; j++) {
                     inst.set(j, Integer.valueOf(bytes[j]));
                 }
+                inst.setClassValue(cls);
+                if (i % 10 == 9) {
+                    cls++;
+                }
                 i++;
-                inst.setClassValue(i);
             }
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);

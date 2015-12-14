@@ -28,20 +28,11 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import org.clueminer.attributes.BasicAttrType;
-import org.clueminer.dataset.plugin.ArrayDataset;
-import org.clueminer.dataset.row.IntegerDataRow;
 import org.clueminer.demo.gui.faces.FacePanel;
-import org.openide.util.Exceptions;
+import org.clueminer.demo.gui.faces.FacesProvider;
 
 /**
  *
@@ -50,7 +41,7 @@ import org.openide.util.Exceptions;
 public class Olivetti extends BaseFrame {
 
     private static final long serialVersionUID = -7539640234381467820L;
-    private static final Logger logger = Logger.getLogger(Olivetti.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Olivetti.class.getName());
     private JPanel panel;
 
     public Olivetti() {
@@ -86,46 +77,8 @@ public class Olivetti extends BaseFrame {
         c.gridwidth = 1;
         c.weightx = c.weighty = 1.0; //no fill while resize
 
-        ResLoader loader = new ResLoader();
-
-        final int cntImages = 400;
-
-        File f = loader.resource("faces.csv");
-        //final int[][] images = new int[cntImages][4096];
-        int attrCnt = 4096;
-        ArrayDataset<IntegerDataRow> dataset = new ArrayDataset<>(cntImages, attrCnt);
-        for (int j = 0; j < attrCnt; j++) {
-            dataset.attributeBuilder().create("attr_" + j, BasicAttrType.NUMERIC);
-        }
-
-        logger.info("loading data...");
-        long start = System.currentTimeMillis();
-        int i = 0;
-        IntegerDataRow inst;
-        int cls = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-            for (String line; (line = br.readLine()) != null;) {
-                String[] bytes = line.split(",");
-                inst = new IntegerDataRow(dataset.attributeCount());
-                dataset.add(inst);
-                for (int j = 0; j < bytes.length; j++) {
-                    inst.set(j, Integer.valueOf(bytes[j]));
-                }
-                inst.setClassValue(cls);
-                if (i % 10 == 9) {
-                    cls++;
-                }
-                i++;
-            }
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        logger.log(Level.INFO, "data loaded in {0}ms", (System.currentTimeMillis() - start));
-
-        panel = new FacePanel(dataset);
-
+        panel = new FacePanel(FacesProvider.createLoader().first());
+        panel.setSize(this.getSize());
         add(panel, c);
 
         setVisible(true);

@@ -28,7 +28,7 @@ import java.awt.image.WritableRaster;
 import java.util.HashMap;
 import org.clueminer.colors.ColorBrewer;
 import org.clueminer.dataset.api.ColorGenerator;
-import org.clueminer.dataset.plugin.ArrayDataset;
+import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.row.IntegerDataRow;
 import org.clueminer.gui.BPanel;
 
@@ -40,7 +40,7 @@ import org.clueminer.gui.BPanel;
 public class FacePanel extends BPanel {
 
     private static final long serialVersionUID = 2144561337674137421L;
-    private final ArrayDataset<IntegerDataRow> images;
+    private final Dataset<IntegerDataRow> images;
     private final int width = 64;
     private final int height = 64;
     private final int cntImages;
@@ -48,7 +48,7 @@ public class FacePanel extends BPanel {
     private BufferedImage[] faces;
     private HashMap<Object, Color> colors = new HashMap<>();
 
-    public FacePanel(ArrayDataset<IntegerDataRow> images) {
+    public FacePanel(Dataset<IntegerDataRow> images) {
         this.images = images;
         cntImages = images.size();
         faces = new BufferedImage[cntImages];

@@ -72,11 +72,11 @@ public class FacesProvider<E extends Instance> implements DataProvider {
             for (String line; (line = br.readLine()) != null;) {
                 String[] bytes = line.split(",");
                 inst = new IntegerDataRow(dataset.attributeCount());
-                dataset.add(inst);
                 for (int j = 0; j < bytes.length; j++) {
                     inst.set(j, Integer.valueOf(bytes[j]));
                 }
                 inst.setClassValue(cls);
+                dataset.add(inst);
                 if (i % 10 == 9) {
                     cls++;
                 }

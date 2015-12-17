@@ -59,12 +59,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>chinesewhispers</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>fastcommunity</artifactId>
+            <artifactId>graph-alg</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

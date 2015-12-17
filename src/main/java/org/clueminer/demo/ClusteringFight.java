@@ -22,8 +22,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import org.clueminer.clustering.aggl.HAC;
-import org.clueminer.clustering.aggl.HACLW;
+import org.clueminer.clustering.aggl.HC;
+import org.clueminer.clustering.aggl.HCLW;
 import org.clueminer.clustering.aggl.linkage.SingleLinkage;
 import org.clueminer.clustering.api.AgglParams;
 import org.clueminer.clustering.api.dendrogram.DendrogramMapping;
@@ -62,8 +62,8 @@ public class ClusteringFight extends JFrame {
                 panel1.setProperties(props);
                 panel2.setProperties(props);
 
-                panel1.setAlgorithm(new HAC());
-                panel2.setAlgorithm(new HACLW());
+                panel1.setAlgorithm(new HC());
+                panel2.setAlgorithm(new HCLW());
                 DendrogramMapping res1 = panel1.execute();
                 DendrogramMapping res2 = panel2.execute();
                 OptimalTreeOrder order = new MOLO();

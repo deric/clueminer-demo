@@ -136,6 +136,10 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         }
     }
 
+    public void setSimpleMode(boolean b) {
+        viewer.setSimpleMode(b);
+    }
+
     /**
      * Instead of running real clustering we'll display dataset with class
      * labels

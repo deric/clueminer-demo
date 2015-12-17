@@ -22,6 +22,7 @@ import com.xeiam.xchart.Series;
 import com.xeiam.xchart.StyleManager;
 import com.xeiam.xchart.VectorGraphicsEncoder;
 import com.xeiam.xchart.XChartPanel;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -45,9 +46,12 @@ import org.openide.util.Exceptions;
  */
 public class CliPlot<E extends Instance, C extends Cluster<E>> extends JPanel {
 
+    private static final long serialVersionUID = -8631119859003411411L;
+
     private int markerSize = 10;
     private Chart currChart;
     private XChartPanel xchart;
+    private boolean simple = false;
 
     public CliPlot() {
         initComponents();
@@ -84,12 +88,23 @@ public class CliPlot<E extends Instance, C extends Cluster<E>> extends JPanel {
         int attrY = 1;
 
         Chart chart = new Chart(getWidth(), getHeight());
-        chart.getStyleManager().setChartType(StyleManager.ChartType.Scatter);
+        StyleManager sm = chart.getStyleManager();
+        sm.setChartType(StyleManager.ChartType.Scatter);
 
-        // Customize Chart
-        chart.getStyleManager().setChartTitleVisible(false);
-        chart.getStyleManager().setLegendPosition(StyleManager.LegendPosition.OutsideE);
-        chart.getStyleManager().setMarkerSize(markerSize);
+        sm.setChartTitleVisible(false);
+        if (simple) {
+            // Customize Chart
+            sm.setLegendVisible(false);
+            sm.setAxisTitlesVisible(false);
+            sm.setAxisTitlePadding(0);
+            sm.setChartBackgroundColor(Color.WHITE);
+            sm.setPlotBorderVisible(false);
+            sm.setAxisTicksVisible(false);
+        } else {
+            sm.setLegendPosition(StyleManager.LegendPosition.OutsideE);
+        }
+
+        sm.setMarkerSize(markerSize);
 
         //update reference to current chart
         this.currChart = chart;
@@ -101,6 +116,10 @@ public class CliPlot<E extends Instance, C extends Cluster<E>> extends JPanel {
         xchart = new XChartPanel(chart);
 
         return xchart;
+    }
+
+    public void setSimpleMode(boolean b) {
+        this.simple = b;
     }
 
     public void setClusterings(final Clustering<E, C> clusteringA, final Clustering<E, C> clusteringB) {

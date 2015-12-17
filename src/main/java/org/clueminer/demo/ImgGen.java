@@ -47,8 +47,10 @@ public class ImgGen {
         String[] datasets = data.getDatasetNames();
 
         final ScatterViewer scatter = new ScatterViewer(data);
+        scatter.setSimpleMode(true);
 
         CliPlot plot = new CliPlot();
+        plot.setSimpleMode(true);
         plot.setSize(params.width, params.height);
         Dataset d;
         for (String name : datasets) {

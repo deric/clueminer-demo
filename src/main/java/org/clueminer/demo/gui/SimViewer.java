@@ -64,10 +64,14 @@ import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import static org.clueminer.demo.gui.AbstractClusteringViewer.RP;
 import org.clueminer.dendrogram.DataProviderMap;
+import org.clueminer.distance.EuclideanDistance;
 import org.clueminer.eval.utils.HashEvaluationTable;
 import org.clueminer.graph.adjacencyList.AdjListGraph;
 import org.clueminer.graph.api.Edge;
 import org.clueminer.graph.api.Graph;
+import org.clueminer.graph.api.GraphBuilder;
+import org.clueminer.graph.api.GraphConvertor;
+import org.clueminer.graph.api.GraphConvertorFactory;
 import org.clueminer.graph.api.Node;
 import org.clueminer.graph.knn.KNNGraphBuilder;
 import org.clueminer.partitioning.api.Bisection;
@@ -84,6 +88,7 @@ import org.openide.util.Task;
 import org.openide.util.TaskListener;
 
 /**
+ * Visualize dataset converted to a graph (k-NN graph).
  *
  * @author deric
  * @param <E>
@@ -103,7 +108,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private boolean drawing = false;
     private Point mousePress = null;
     private boolean mode2d = true;
-    private KNNGraphBuilder<E> knn;
+    private GraphConvertor<E> knn;
     private Graph<E> graph;
     private Props pref;
     private boolean hasData = false;
@@ -128,7 +133,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         GridBagLayout gbl = new GridBagLayout();
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
-        knn = new KNNGraphBuilder();
+        knn = GraphConvertorFactory.getInstance().getProvider(KNNGraphBuilder.NAME);
         graph = new AdjListGraph();
         pref = new Props();
 
@@ -144,6 +149,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         this.add((Component) viewer, c);
         setVisible(true);
         colorScheme = new ColorSchemeImpl(Color.red, Color.BLACK, Color.GREEN);
+    }
+
+    public void setGraphConvertor(GraphConvertor<E> graphConv) {
+        this.knn = graphConv;
     }
 
     public void setClustering(Clustering clusters) {
@@ -304,10 +313,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             max = edgeMax;
             mid = (edgeMax - edgeMin) / 2.0;
             min = edgeMin;
-            /*System.out.println("==== partition");
-             System.out.println("min = " + min);
-             System.out.println("mid = " + mid);
-             System.out.println("max = " + max);*/
+            /* System.out.println("==== partition");
+             * System.out.println("min = " + min);
+             * System.out.println("mid = " + mid);
+             * System.out.println("max = " + max); */
         } else if (graph != null) {
             double edgeMin = Double.MAX_VALUE;
             double edgeMax = Double.MIN_VALUE;
@@ -327,13 +336,13 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                     edgeMin = e.getWeight();
                 }
             }
-            /*     System.out.println("=====edges ");
-             max = edgeMax;
-             mid = (edgeMax - edgeMin) / 2.0;
-             min = edgeMin;
-             System.out.println("min = " + min);
-             System.out.println("mid = " + mid);
-             System.out.println("max = " + max);*/
+            /* System.out.println("=====edges ");
+             * max = edgeMax;
+             * mid = (edgeMax - edgeMin) / 2.0;
+             * min = edgeMin;
+             * System.out.println("min = " + min);
+             * System.out.println("mid = " + mid);
+             * System.out.println("max = " + max); */
         }
 
         if (merger != null) {
@@ -448,8 +457,13 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         System.out.println("dataset size: " + dataset.size());
         System.out.println("computing knn(" + datasetK + ")");
         graph = new AdjListGraph();
+        graph.ensureCapacity(dataset.size());
         graph.lookupAdd(dataset);
-        graph = knn.getNeighborGraph(dataset, graph, datasetK);
+        //graph = knn.getNeighborGraph(dataset, graph, datasetK);
+        GraphBuilder gb = graph.getFactory();
+        Long[] mapping = gb.createNodesFromInput(dataset, graph);
+        knn.setDistanceMeasure(EuclideanDistance.getInstance());
+        knn.createEdges(graph, dataset, mapping, pref);
         alpha = pref.getInt("alpha", 255);
 
         //bisection = pref.get(BISECTION, "Kernighan-Lin");
@@ -487,25 +501,25 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             }
             merger.initialize(partitioningResult, graph, bisectionAlg, pref, noise);
 
-            /*    double edgeMin = Double.MAX_VALUE;
-             double edgeMax = Double.MIN_VALUE;
-             for (Edge e : graph.getEdges()) {
-             if (e.getWeight() > edgeMax) {
-             edgeMax = e.getWeight();
-             }
-             if (e.getWeight() > 0 && e.getWeight() < edgeMin) {
-             edgeMin = e.getWeight();
-             }
-             }*/
+            /* double edgeMin = Double.MAX_VALUE;
+             * double edgeMax = Double.MIN_VALUE;
+             * for (Edge e : graph.getEdges()) {
+             * if (e.getWeight() > edgeMax) {
+             * edgeMax = e.getWeight();
+             * }
+             * if (e.getWeight() > 0 && e.getWeight() < edgeMin) {
+             * edgeMin = e.getWeight();
+             * }
+             * } */
             pq = merger.getQueue(pref);
-            /*   //PairValue<GraphCluster<E>> head = pq.peek();
-             max = edgeMax;
-             mid = (edgeMax - edgeMin) / 2.0;
-             min = edgeMin;
-
-             System.out.println("min = " + min);
-             System.out.println("mid = " + mid);
-             System.out.println("max = " + max);*/
+            /* //PairValue<GraphCluster<E>> head = pq.peek();
+             * max = edgeMax;
+             * mid = (edgeMax - edgeMin) / 2.0;
+             * min = edgeMin;
+             *
+             * System.out.println("min = " + min);
+             * System.out.println("mid = " + mid);
+             * System.out.println("max = " + max); */
 
             System.out.println("queue: " + pq.size());
             hasData = true;

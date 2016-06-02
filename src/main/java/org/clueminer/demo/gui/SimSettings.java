@@ -29,6 +29,8 @@ import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.graph.api.GraphConvertorFactory;
+import org.clueminer.graph.knn.KNNGraphBuilder;
 import org.clueminer.utils.Props;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
@@ -46,6 +48,7 @@ public class SimSettings<E extends Instance, C extends Cluster<E>> extends JPane
     private static final long serialVersionUID = 4694033662557233989L;
 
     private JComboBox dataBox;
+    private JComboBox graphConvertors;
     private JButton btnSettings;
     private final SimViewer panel;
     private PartitionSettings partitionPanel;
@@ -72,6 +75,18 @@ public class SimSettings<E extends Instance, C extends Cluster<E>> extends JPane
             }
         });
         add(dataBox);
+
+        graphConvertors = new JComboBox(GraphConvertorFactory.getInstance().getProvidersArray());
+        graphConvertors.setSelectedItem(KNNGraphBuilder.NAME);
+        graphConvertors.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GraphConvertorFactory gcf = GraphConvertorFactory.getInstance();
+                panel.setGraphConvertor(gcf.getProvider(graphConvertors.getSelectedItem().toString()));
+                execute();
+            }
+        });
+        add(graphConvertors);
 
         btnSettings = new JButton("Settings");
         btnSettings.addActionListener(new ActionListener() {

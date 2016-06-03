@@ -18,7 +18,7 @@ package org.clueminer.demo.gui;
 
 import java.util.Map;
 import org.clueminer.clustering.ClusteringExecutorCached;
-import org.clueminer.clustering.api.AgglParams;
+import org.clueminer.clustering.api.AlgParams;
 import org.clueminer.clustering.api.Executor;
 import org.clueminer.clustering.api.dendrogram.DendrogramMapping;
 import org.clueminer.dataset.api.DataProvider;
@@ -106,14 +106,14 @@ public class HacDendroPanel extends DendroPanel {
     @Override
     public void linkageChanged(String linkage) {
         Props params = getProperties().copy();
-        params.put(AgglParams.LINKAGE, linkage);
+        params.put(AlgParams.LINKAGE, linkage);
         execute(params);
     }
 
     @Override
     public void cutoffChanged(String cutoff) {
         Props params = getProperties().copy();
-        params.put(AgglParams.CUTOFF_STRATEGY, cutoff);
+        params.put(AlgParams.CUTOFF_STRATEGY, cutoff);
         execute(params);
     }
 

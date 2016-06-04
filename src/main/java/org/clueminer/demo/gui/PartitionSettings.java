@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2015 clueminer.org
+ * Copyright (C) 2011-2016 clueminer.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.clueminer.chameleon.Chameleon;
 import org.clueminer.clustering.api.factory.MergeEvaluationFactory;
+import org.clueminer.neighbor.KnnFactory;
 import org.clueminer.utils.Props;
 
 /**
@@ -35,13 +36,15 @@ import org.clueminer.utils.Props;
  */
 public class PartitionSettings extends JPanel {
 
+    private static final long serialVersionUID = -5051188335453344618L;
     private JTextField tfK;
     private JCheckBox chckAutoK;
     private JTextField tfMaxP;
     private JTextField tfAlpha;
     private JCheckBox chckAutoMaxP;
     private JCheckBox chckPartition;
-    private JComboBox comboSimilarity;
+    private JComboBox<String> comboSimilarity;
+    private JComboBox<String> comboKnn;
 
     public PartitionSettings() {
         initComponents();
@@ -115,6 +118,14 @@ public class PartitionSettings extends JPanel {
         c.weightx = 0.9;
         add(tfAlpha, c);
 
+        c.gridy++;
+        c.gridx = 0;
+        add(new JLabel("k-nn search:"), c);
+        c.gridx = 1;
+        c.weightx = 0.9;
+        comboKnn = new JComboBox(initKnn());
+        add(comboKnn, c);
+
     }
 
     public Props getParams() {
@@ -130,12 +141,17 @@ public class PartitionSettings extends JPanel {
             props.put("skip_partition", true);
         }
         props.putInt("alpha", Integer.valueOf(tfAlpha.getText()));
+        props.put(KnnFactory.KNN_SEARCH, comboKnn.getSelectedItem());
 
         return props;
     }
 
     private Object[] initSimilarity() {
         return MergeEvaluationFactory.getInstance().getProvidersArray();
+    }
+
+    private Object[] initKnn() {
+        return KnnFactory.getInstance().getProvidersArray();
     }
 
 }

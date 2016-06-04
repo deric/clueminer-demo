@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2015 clueminer.org
+ * Copyright (C) 2011-2016 clueminer.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,8 @@ public class SimSettings<E extends Instance, C extends Cluster<E>> extends JPane
 
     private static final long serialVersionUID = 4694033662557233989L;
 
-    private JComboBox dataBox;
-    private JComboBox graphConvertors;
+    private JComboBox<String> dataBox;
+    private JComboBox<String> graphConvertors;
     private JButton btnSettings;
     private final SimViewer panel;
     private PartitionSettings partitionPanel;

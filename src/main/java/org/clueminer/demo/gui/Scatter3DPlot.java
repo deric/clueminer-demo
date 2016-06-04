@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2015 clueminer.org
+ * Copyright (C) 2011-2016 clueminer.org
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ import org.math.plot.Plot3DPanel;
  * @param <C>
  */
 public class Scatter3DPlot<E extends Instance, C extends Cluster<E>> extends JPanel {
+
+    private static final long serialVersionUID = 8065053854767902112L;
 
     private Plot3DPanel plot;
 

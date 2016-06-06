@@ -463,6 +463,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         GraphBuilder gb = graph.getFactory();
         Long[] mapping = gb.createNodesFromInput(dataset, graph);
         knn.setDistanceMeasure(EuclideanDistance.getInstance());
+        pref.put("knn-convertor", knn.getName());
         knn.createEdges(graph, dataset, mapping, pref);
         alpha = pref.getInt("alpha", 255);
 

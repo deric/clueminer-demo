@@ -83,7 +83,7 @@ public class SimSettings<E extends Instance, C extends Cluster<E>> extends JPane
             public void actionPerformed(ActionEvent e) {
                 GraphConvertorFactory gcf = GraphConvertorFactory.getInstance();
                 panel.setGraphConvertor(gcf.getProvider(graphConvertors.getSelectedItem().toString()));
-                execute();
+                panel.computeNN(panel.getDataset(), getProps());
             }
         });
         add(graphConvertors);

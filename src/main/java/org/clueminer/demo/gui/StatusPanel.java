@@ -30,6 +30,7 @@ import org.clueminer.clustering.api.ClusterEvaluation;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.HierarchicalResult;
+import org.clueminer.clustering.api.ScoreException;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.eval.external.NMIsqrt;
@@ -101,10 +102,16 @@ public class StatusPanel<E extends Instance, C extends Cluster<E>> extends JPane
                 sb.append(", classes: ").append(dataset.getClasses().size());
             }
             sb.append(", total clusters: ").append(clust.size());
-            double score = evaluator.score(clust);
-            System.out.println(evaluator.getName() + ": " + score + " [" + repeatCnt + "]");
-            scoreSum += score;
-            sb.append(", ").append(evaluator.getName()).append(": ").append(decimalFormat.format(score));
+            double score;
+            try {
+                score = evaluator.score(clust);
+                System.out.println(evaluator.getName() + ": " + score + " [" + repeatCnt + "]");
+                scoreSum += score;
+                sb.append(", ").append(evaluator.getName()).append(": ").append(decimalFormat.format(score));
+            } catch (ScoreException ex) {
+                System.err.println("failed to compute score: " + ex.getMessage());
+            }
+
             double avg = scoreSum / (double) repeatCnt;
             System.out.println("avg = " + avg);
             sb.append(", ").append("avg").append(": ").append(decimalFormat.format(avg));

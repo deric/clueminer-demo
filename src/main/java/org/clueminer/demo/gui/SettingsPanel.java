@@ -60,7 +60,6 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private static final long serialVersionUID = 4694033662557233989L;
 
     private JButton btnOptions;
-    private JComboBox dataBox;
     private ClusteringFactory cf;
     private JComboBox algBox;
     private JComboBox validationBox;
@@ -81,23 +80,10 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
         controlListeners.add(ControlListener.class, status);
         initComponents();
         algBox.setSelectedItem("k-means");
-        setDatasets(panel.getDatasets());
     }
 
     private void initComponents() {
         setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-
-        dataBox = new JComboBox();
-        dataBox.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                panel.dataChanged((String) dataBox.getSelectedItem());
-                updateAlgorithm();
-                execute();
-            }
-        });
-        add(dataBox);
 
         cf = ClusteringFactory.getInstance();
         algBox = new JComboBox(cf.getProvidersArray());
@@ -185,7 +171,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
         });
     }
 
-    private void execute() {
+    public void execute() {
         int i = 0;
         int repeat = (int) spinRepeat.getValue();
         Props p = getProps();
@@ -225,12 +211,6 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
         updateUI(getAlgorithm());
     }
 
-    public final void setDatasets(String[] datasets) {
-        for (String str : datasets) {
-            dataBox.addItem(str);
-        }
-    }
-
     public ClusteringAlgorithm getAlgorithm() {
         String algName = (String) algBox.getSelectedItem();
         ClusteringAlgorithm algorithm = ClusteringFactory.getInstance().getProvider(algName);
@@ -254,7 +234,6 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     @Override
     public void clusteringChanged(Clustering clust) {
         algBox.setEnabled(true);
-        dataBox.setEnabled(true);
         btnOptions.setEnabled(true);
         validationBox.setEnabled(true);
     }
@@ -268,7 +247,6 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     public void clusteringStarted(Dataset<E> dataset, Props params) {
         //TODO: disable controls?
         algBox.setEnabled(false);
-        dataBox.setEnabled(false);
         btnOptions.setEnabled(false);
         validationBox.setEnabled(false);
     }

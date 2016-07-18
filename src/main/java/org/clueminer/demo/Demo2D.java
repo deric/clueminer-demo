@@ -120,8 +120,6 @@ public class Demo2D<E extends Instance, C extends Cluster<E>> extends BaseFrame 
         //only one item can be selected at the time
         datasets.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
         dataScrollPane.setViewportView(datasets);
-        datasets.setSelectedValue("aggregation", true);
-
         datasets.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -157,6 +155,8 @@ public class Demo2D<E extends Instance, C extends Cluster<E>> extends BaseFrame 
             this.add((Component) plotPane, c);
         }
         setVisible(true);
+        //select some dataset
+        datasets.setSelectedValue("aggregation", true);
     }
 
 }

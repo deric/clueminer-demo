@@ -40,4 +40,13 @@ public class ImgParams {
     @Parameter(names = {"--format", "-f"})
     String format = "png";
 
+    @Parameter(names = {"--data", "-d"})
+    public String dataset;
+
+    @Parameter(names = {"--cluster", "-c"}, description = "if false golden clustering will be used")
+    public boolean computeClustering = false;
+
+    @Parameter(names = {"--params", "-p"})
+    public String params;
+
 }

@@ -22,12 +22,23 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
+import org.clueminer.clustering.ClusteringExecutorCached;
+import org.clueminer.clustering.api.Clustering;
+import org.clueminer.clustering.api.Executor;
 import org.clueminer.data.DataLoader;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
+import org.clueminer.dataset.impl.ArrayDataset;
 import org.clueminer.demo.gui.CliPlot;
 import org.clueminer.demo.gui.ScatterViewer;
+import org.clueminer.exception.ParserError;
+import org.clueminer.io.ARFFHandler;
+import org.clueminer.utils.Props;
+import org.openide.util.Exceptions;
 
 /**
  * Generate simple dataset visualizations to given image format
@@ -36,11 +47,13 @@ import org.clueminer.demo.gui.ScatterViewer;
  */
 public class ImgGen {
 
+    private static final Logger LOG = Logger.getLogger(ImgGen.class.getName());
+
     public static void main(String[] args) {
 
-        final ImgParams params = new ImgParams();
-        JCommander cmd = new JCommander(params);
-        printUsage(args, cmd, params);
+        final ImgParams arg = new ImgParams();
+        JCommander cmd = new JCommander(arg);
+        printUsage(args, cmd, arg);
 
         final String cat = "artificial";
         final DataProvider data = DataLoader.createLoader("datasets", cat);
@@ -51,17 +64,69 @@ public class ImgGen {
 
         CliPlot plot = new CliPlot();
         plot.setSimpleMode(true);
-        plot.setSize(params.width, params.height);
+        plot.setSize(arg.width, arg.height);
+        System.out.println("exporting data to: " + workDir(arg, cat));
         Dataset d;
-        for (String name : datasets) {
-            d = data.getDataset(name);
-            System.out.println("rendering " + name);
-            plot.setClustering(scatter.goldenClustering(d));
-            plot.repaint();
-            File file = new File(workDir(params, cat) + File.separatorChar + safeName(name) + "." + params.format);
-            plot.saveFile(file, params.format);
+        Executor exec = new ClusteringExecutorCached();
+        if (arg.dataset != null) {
+            d = getDataset(arg.dataset, arg, data);
+            process(d, scatter, plot, arg, cat, exec);
+        } else {
+            for (String dataset : datasets) {
+                d = getDataset(dataset, arg, data);
+                process(d, scatter, plot, arg, cat, exec);
+            }
+        }
+    }
+
+    private static Dataset getDataset(String name, ImgParams arg, DataProvider provider) {
+        Dataset dataset;
+        if (provider.hasDataset(name)) {
+            dataset = provider.getDataset(name);
+        } else {
+            String type = "arff";
+            String path = name;
+            if (!path.contains(".")) {
+                path += "." + type;
+            }
+            File file = new File(name);
+            if (!file.exists()) {
+                throw new RuntimeException("could not load " + name);
+            }
+            dataset = new ArrayDataset(10, 2);
+            dataset.setName(name);
+            ARFFHandler arff = new ARFFHandler();
+            try {
+                arff.load(file, dataset);
+            } catch (FileNotFoundException | ParserError ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
 
+        return dataset;
+    }
+
+    private static void process(Dataset d, ScatterViewer scatter, CliPlot plot,
+            ImgParams arg, final String cat, Executor exec) {
+        System.out.println("rendering " + d.getName());
+        String output = d.getName();
+        if (arg.computeClustering) {
+            Props p = new Props();
+            if (arg.params != null) {
+                p = Props.fromJson(arg.params);
+                if (p.containsKey("algorithm")) {
+                    output = p.get("algorithm") + "-" + d.getName();
+                }
+            }
+            Clustering c = exec.clusterRows(d, p);
+            plot.setClustering(c);
+        } else {
+            plot.setClustering(scatter.goldenClustering(d));
+        }
+        plot.repaint();
+        File file = new File(workDir(arg, cat) + File.separatorChar + safeName(output) + "." + arg.format);
+        LOG.log(Level.INFO, "writing to {0}", file.getPath());
+        plot.saveFile(file, arg.format);
     }
 
     public static String safeName(String name) {

@@ -23,6 +23,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
@@ -50,8 +51,11 @@ public class ImgGen {
     private static final Logger LOG = Logger.getLogger(ImgGen.class.getName());
 
     public static void main(String[] args) {
-
+        System.out.println("args: " + Arrays.toString(args));
         final ImgParams arg = new ImgParams();
+        ArgParser prm = new ArgParser().run(args);
+        System.out.println("json: " + prm.params);
+
         JCommander cmd = new JCommander(arg);
         printUsage(args, cmd, arg);
 

@@ -26,17 +26,19 @@ function main {
   MAIN="org.clueminer.demo.ImgGen"
   jarfile="$(ls -t target/*jar-with-dependencies.jar 2>/dev/null | head -1)"
   JAVA_XMX="${JAVA_XMX:-4096m}"
-  ARGS=$(escape "$@")
 
   if [[ -f "$jarfile" ]]; then
+    ARGS=$(escape "$@")
     cmd="java -Xmx$JAVA_XMX -jar $jarfile ${ARGS}"
   else
     path="target/lib"
-    if [[ -d $path ]]; then
+    if [[ -d "$path" ]]; then
+      ARGS=$(escape "$@")
       CLASSPATH=$(find "." -name '*.jar' | xargs echo | tr ' ' ':')
       cmd="java -Xmx$JAVA_XMX -cp $CLASSPATH $MAIN ${ARGS}"
     else
-      cmd="mvn -Dexec.args=-classpath %classpath $MAIN $ARGS -Dexec.executable=java \
+      ARGS="$@"
+      cmd="mvn \"-Dexec.args=-classpath %classpath $MAIN $ARGS\" -Dexec.executable=java \
         -Dexec.classpathScope=runtime org.codehaus.mojo:exec-maven-plugin:1.2.1:exec"
     fi
   fi

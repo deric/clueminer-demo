@@ -23,7 +23,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
@@ -51,11 +50,7 @@ public class ImgGen {
     private static final Logger LOG = Logger.getLogger(ImgGen.class.getName());
 
     public static void main(String[] args) {
-        System.out.println("args: " + Arrays.toString(args));
         final ImgParams arg = new ImgParams();
-        ArgParser prm = new ArgParser().run(args);
-        System.out.println("json: " + prm.params);
-
         JCommander cmd = new JCommander(arg);
         printUsage(args, cmd, arg);
 
@@ -69,6 +64,7 @@ public class ImgGen {
         CliPlot plot = new CliPlot();
         plot.setSimpleMode(true);
         plot.setSize(arg.width, arg.height);
+        System.out.println("params: " + arg.getParams());
         System.out.println("exporting data to: " + workDir(arg, cat));
         Dataset d;
         Executor exec = new ClusteringExecutorCached();
@@ -116,8 +112,8 @@ public class ImgGen {
         String output = d.getName();
         if (arg.computeClustering) {
             Props p = new Props();
-            if (arg.params != null) {
-                p = Props.fromJson(arg.params);
+            if (!arg.getParams().isEmpty()) {
+                p = Props.fromJson(arg.getParams());
                 if (p.containsKey("algorithm")) {
                     output = p.get("algorithm") + "-" + d.getName();
                 }
@@ -178,6 +174,7 @@ public class ImgGen {
 
         } catch (ParameterException ex) {
             System.out.println(ex.getMessage());
+            Exceptions.printStackTrace(ex);
             cmd.usage();
             System.exit(0);
         }

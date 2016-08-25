@@ -18,6 +18,8 @@ package org.clueminer.demo;
 
 import com.beust.jcommander.Parameter;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.clueminer.utils.FileUtils;
 import org.openide.util.NbBundle;
 
@@ -46,7 +48,25 @@ public class ImgParams {
     @Parameter(names = {"--cluster", "-c"}, description = "if false golden clustering will be used")
     public boolean computeClustering = false;
 
-    @Parameter(names = {"--params", "-p"})
-    public String params;
+    /**
+     * A hack to support passing json containing whitespaces
+     */
+    @Parameter(names = {"--params", "-p"}, variableArity = true, splitter = NoopSplitter.class)
+    public List<String> params = new ArrayList<>();
+
+    private String p;
+
+    public String getParams() {
+        if (p == null) {
+            StringBuilder sb = new StringBuilder();
+            for (String s : params) {
+                sb.append(s).append(" ");
+            }
+            p = sb.toString();
+
+        }
+        return p;
+    }
+
 
 }

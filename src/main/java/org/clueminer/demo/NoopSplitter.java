@@ -16,32 +16,22 @@
  */
 package org.clueminer.demo;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import com.beust.jcommander.converters.IParameterSplitter;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
  * @author deric
  */
-public class ArgParser {
+public class NoopSplitter implements IParameterSplitter {
 
-    @Option(name = "-f", aliases = {"--format"}, usage = "output format (png, jpg)")
-    public String format;
-
-    @Option(name = "-p", usage = "JSON params")
-    public String params;
-
-    public ArgParser run(String[] args) {
-        CmdLineParser p = new CmdLineParser(this);
-        try {
-            p.parseArgument(args);
-
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            p.printUsage(System.err);
-        }
-        return this;
+    @Override
+    public List<String> split(String value) {
+        System.out.println("splitting: " + value);
+        List<String> res = new LinkedList<>();
+        res.add(value);
+        return res;
     }
 
 }

@@ -1,22 +1,58 @@
 #!/bin/bash
-ARGS="$*"
-arg=($ARGS)
-MAIN="org.clueminer.demo.ImgGen"
-# re-escape passed JSON string (TODO: nested {}? )
-#ARGS="$(echo ${ARGS} | sed -r 's/\{/\"\{/g' | sed -r 's/\}/\}\"/g')"
-jarfile="$(ls -t target/*jar-with-dependencies.jar | head -1)"
-JAVA_XMX="${JAVA_XMX:-4096m}"
-if [[ -f "$jarfile" ]]; then
-  echo "using max heap: $JAVA_XMX"
-  java -Xmx$JAVA_XMX -jar $jarfile <<<$arg
-else
-  path="target/lib"
-  echo "using max heap: $JAVA_XMX"
-  if [[ -d $path ]]; then
-    CLASSPATH=$(find "." -name '*.jar' | xargs echo | tr ' ' ':')
-    java -Xmx$JAVA_XMX -cp $CLASSPATH $MAIN "${ARGS}"
-  else
-    mvn "-Dexec.args=-classpath %classpath $MAIN $ARGS" -Dexec.executable=java -Dexec.classpathScope=runtime org.codehaus.mojo:exec-maven-plugin:1.2.1:exec
-  fi
-fi
+#set -o errexit -o nounset -o pipefail
+export LC_ALL=C
+function -h {
+  cat <<USAGE
+   USAGE: script for exporting data visualizations
+USAGE
+}; function --help { -h ;}
 
+function msg { out "$*" >&2 ;}
+function out { printf '%s\n' "$*" ;}
+function err { local x=$? ; msg "$*" ; return $(( $x == 0 ? 1 : $x )) ;}
+
+# escape all argument to be passed to java in order to prevent loss of
+# information
+function escape {
+  args=("$@")
+  ARGS=""
+  for var in "${args[@]}"; do
+    ARGS="${ARGS} \"$var\""
+  done
+  echo $ARGS
+}
+
+function main {
+  MAIN="org.clueminer.demo.ImgGen"
+  jarfile="$(ls -t target/*jar-with-dependencies.jar 2>/dev/null | head -1)"
+  JAVA_XMX="${JAVA_XMX:-4096m}"
+  ARGS=$(escape "$@")
+
+  if [[ -f "$jarfile" ]]; then
+    cmd="java -Xmx$JAVA_XMX -jar $jarfile ${ARGS}"
+  else
+    path="target/lib"
+    if [[ -d $path ]]; then
+      CLASSPATH=$(find "." -name '*.jar' | xargs echo | tr ' ' ':')
+      cmd="java -Xmx$JAVA_XMX -cp $CLASSPATH $MAIN ${ARGS}"
+    else
+      cmd="mvn -Dexec.args=-classpath %classpath $MAIN $ARGS -Dexec.executable=java \
+        -Dexec.classpathScope=runtime org.codehaus.mojo:exec-maven-plugin:1.2.1:exec"
+    fi
+  fi
+  msg "using max heap: $JAVA_XMX"
+  #echo $cmd
+  # run the command
+  eval $cmd
+}
+
+if [[ ${1:-} ]] && declare -F | cut -d' ' -f3 | fgrep -qx -- "${1:-}"
+then
+  case "$1" in
+    -h|--help) : ;;
+    *) ;;
+  esac
+  "$@"
+else
+  main "$@"
+fi

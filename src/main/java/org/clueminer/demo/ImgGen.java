@@ -174,7 +174,6 @@ public class ImgGen {
 
         } catch (ParameterException ex) {
             System.out.println(ex.getMessage());
-            Exceptions.printStackTrace(ex);
             cmd.usage();
             System.exit(0);
         }

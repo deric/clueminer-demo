@@ -29,6 +29,7 @@ import javax.swing.JPanel;
 import org.clueminer.clustering.ClusteringExecutorCached;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.Executor;
+import org.clueminer.colors.ColorBrewer;
 import org.clueminer.data.DataLoader;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
@@ -68,6 +69,7 @@ public class ImgGen {
         System.out.println("exporting data to: " + workDir(arg, cat));
         Dataset d;
         Executor exec = new ClusteringExecutorCached();
+        exec.setColorGenerator(new ColorBrewer());
         if (arg.dataset != null) {
             d = getDataset(arg.dataset, arg, data);
             process(d, scatter, plot, arg, cat, exec);

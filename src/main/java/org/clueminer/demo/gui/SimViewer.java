@@ -67,6 +67,7 @@ import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.distance.EuclideanDistance;
 import org.clueminer.eval.utils.HashEvaluationTable;
 import org.clueminer.graph.adjacencyList.AdjListGraph;
+import org.clueminer.graph.api.Direction;
 import org.clueminer.graph.api.Edge;
 import org.clueminer.graph.api.Graph;
 import org.clueminer.graph.api.GraphBuilder;
@@ -119,6 +120,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private int total;
     private Merger<E> merger;
     private int alpha;
+
+    private Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
+    private Stroke basic = new BasicStroke(3);
+
 
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -300,7 +305,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 //target = translate(elem.B.get(0));
                 //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
                 value = elem.getValue();
-                drawLine(g2, source, target, value);
+                drawLine(g2, source, target, value, Direction.NONE);
 
                 if (value > edgeMax) {
                     edgeMax = value;
@@ -327,7 +332,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 target = translate((E) e.getTarget().getInstance());
                 //target = translate(elem.B.get(0));
                 //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
-                drawLine(g2, source, target, e.getWeight());
+                drawLine(g2, source, target, e.getWeight(), e.getDirection());
 
                 if (e.getWeight() > edgeMax) {
                     edgeMax = e.getWeight();
@@ -368,13 +373,18 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     }
 
-    private void drawLine(Graphics2D g, Point2D source, Point2D target, double value) {
+    private void drawLine(Graphics2D g, Point2D source, Point2D target, double value, Direction direction) {
         Color c;
         if (value > 0) {
             c = colorScheme.getColor(value, min, mid, max);
             //g.setColor(c);
             g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha));
             //System.out.println("val: " + value + ", " + colorScheme.getColor(value, min, mid, max));
+            if (direction == Direction.BOTH) {
+                g.setStroke(basic);
+            } else {
+                g.setStroke(dashed);
+            }
             g.draw(new Line2D.Double(source.getX(), source.getY(), target.getX(), target.getY()));
         }
     }

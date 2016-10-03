@@ -67,7 +67,7 @@ import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.distance.EuclideanDistance;
 import org.clueminer.eval.utils.HashEvaluationTable;
 import org.clueminer.graph.adjacencyList.AdjListGraph;
-import org.clueminer.graph.api.Direction;
+import org.clueminer.graph.api.EdgeType;
 import org.clueminer.graph.api.Edge;
 import org.clueminer.graph.api.Graph;
 import org.clueminer.graph.api.GraphBuilder;
@@ -305,7 +305,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 //target = translate(elem.B.get(0));
                 //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
                 value = elem.getValue();
-                drawLine(g2, source, target, value, Direction.NONE);
+                drawLine(g2, source, target, value, EdgeType.NONE);
 
                 if (value > edgeMax) {
                     edgeMax = value;
@@ -373,14 +373,14 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     }
 
-    private void drawLine(Graphics2D g, Point2D source, Point2D target, double value, Direction direction) {
+    private void drawLine(Graphics2D g, Point2D source, Point2D target, double value, EdgeType direction) {
         Color c;
         if (value > 0) {
             c = colorScheme.getColor(value, min, mid, max);
             //g.setColor(c);
             g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha));
             //System.out.println("val: " + value + ", " + colorScheme.getColor(value, min, mid, max));
-            if (direction == Direction.BOTH) {
+            if (direction == EdgeType.BOTH) {
                 g.setStroke(basic);
             } else {
                 g.setStroke(dashed);

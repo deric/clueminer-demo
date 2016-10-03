@@ -28,7 +28,6 @@ public class NoopSplitter implements IParameterSplitter {
 
     @Override
     public List<String> split(String value) {
-        System.out.println("splitting: " + value);
         List<String> res = new LinkedList<>();
         res.add(value);
         return res;

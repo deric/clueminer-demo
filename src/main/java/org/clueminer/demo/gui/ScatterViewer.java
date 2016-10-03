@@ -336,7 +336,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
         for (int i = 0; i < dataset.size(); i++) {
             try {
                 inst = dataset.get(i);
-                kdTree.insert(inst.arrayCopy(), inst);
+                kdTree.insert(inst, inst);
             } catch (KeySizeException | KeyDuplicateException ex) {
                 Exceptions.printStackTrace(ex);
             }
@@ -407,7 +407,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             E inst = dataset.builder().create(pos);
             inst.setClassValue(Algorithm.OUTLIER_LABEL);
             try {
-                kdTree.insert(pos, inst);
+                kdTree.insert(inst, inst);
             } catch (KeySizeException | KeyDuplicateException ex) {
                 Exceptions.printStackTrace(ex);
             }

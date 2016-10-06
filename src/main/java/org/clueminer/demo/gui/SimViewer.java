@@ -42,6 +42,7 @@ import java.util.SortedSet;
 import javax.swing.JPanel;
 import org.clueminer.chameleon.Chameleon;
 import static org.clueminer.chameleon.Chameleon.BISECTION;
+import static org.clueminer.chameleon.Chameleon.GRAPH_STORAGE;
 import static org.clueminer.chameleon.Chameleon.MERGER;
 import static org.clueminer.chameleon.Chameleon.OBJECTIVE_1;
 import static org.clueminer.chameleon.Chameleon.OBJECTIVE_2;
@@ -66,13 +67,13 @@ import static org.clueminer.demo.gui.AbstractClusteringViewer.RP;
 import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.distance.EuclideanDistance;
 import org.clueminer.eval.utils.HashEvaluationTable;
-import org.clueminer.graph.adjacencyList.AdjListGraph;
-import org.clueminer.graph.api.EdgeType;
 import org.clueminer.graph.api.Edge;
+import org.clueminer.graph.api.EdgeType;
 import org.clueminer.graph.api.Graph;
 import org.clueminer.graph.api.GraphBuilder;
 import org.clueminer.graph.api.GraphConvertor;
 import org.clueminer.graph.api.GraphConvertorFactory;
+import org.clueminer.graph.api.GraphStorageFactory;
 import org.clueminer.graph.api.Node;
 import org.clueminer.graph.knn.KNNGraphBuilder;
 import org.clueminer.partitioning.api.Bisection;
@@ -124,7 +125,6 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
     private Stroke basic = new BasicStroke(3);
 
-
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
     }
@@ -139,7 +139,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
         knn = GraphConvertorFactory.getInstance().getProvider(KNNGraphBuilder.NAME);
-        graph = new AdjListGraph();
+        //graph = new AdjListGraph();
         pref = new Props();
 
         //panel = new JLayeredPane();
@@ -466,8 +466,11 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         int datasetK = pref.getInt(Chameleon.K, determineK(dataset));
         System.out.println("dataset size: " + dataset.size());
         System.out.println("computing knn(" + datasetK + ")");
-        graph = new AdjListGraph();
-        graph.ensureCapacity(dataset.size());
+
+        String graphStorage = pref.get(GRAPH_STORAGE, "Adjacency list graph");
+        System.out.println("using graph storage: " + graphStorage);
+        GraphStorageFactory gsf = GraphStorageFactory.getInstance();
+        graph = gsf.newInstance(graphStorage);
         graph.lookupAdd(dataset);
         //graph = knn.getNeighborGraph(dataset, graph, datasetK);
         GraphBuilder gb = graph.getFactory();

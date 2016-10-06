@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.clueminer.chameleon.Chameleon;
 import org.clueminer.clustering.api.factory.MergeEvaluationFactory;
+import org.clueminer.graph.api.GraphStorageFactory;
 import org.clueminer.neighbor.KnnFactory;
 import org.clueminer.utils.Props;
 
@@ -45,6 +46,7 @@ public class PartitionSettings extends JPanel {
     private JCheckBox chckPartition;
     private JComboBox<String> comboSimilarity;
     private JComboBox<String> comboKnn;
+    private JComboBox<String> graphStorage;
 
     public PartitionSettings() {
         initComponents();
@@ -126,6 +128,15 @@ public class PartitionSettings extends JPanel {
         comboKnn = new JComboBox(initKnn());
         add(comboKnn, c);
 
+        c.gridy++;
+        c.gridx = 0;
+        add(new JLabel("graph store:"), c);
+        c.gridx = 1;
+        c.weightx = 0.9;
+        graphStorage = new JComboBox(GraphStorageFactory.getInstance().getProvidersArray());
+        graphStorage.setSelectedItem("Adjacency list graph");
+        add(graphStorage, c);
+
     }
 
     public Props getParams() {
@@ -142,6 +153,7 @@ public class PartitionSettings extends JPanel {
         }
         props.putInt("alpha", Integer.valueOf(tfAlpha.getText()));
         props.put(KnnFactory.KNN_SEARCH, comboKnn.getSelectedItem());
+        props.put(Chameleon.GRAPH_STORAGE, graphStorage.getSelectedItem());
 
         return props;
     }

@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.colors.ColorBrewer;
+import org.clueminer.colors.PaletteGenerator;
 import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -59,7 +60,7 @@ public class FacePanel<E extends Instance, C extends Cluster<E>> extends BPanel 
         this.images = images;
         cntImages = images.size();
         faces = new BufferedImage[cntImages];
-        cg = new ColorBrewer();
+        cg = new PaletteGenerator();
     }
 
     public FacePanel() {

@@ -54,9 +54,7 @@ public class FacesProvider<E extends Instance> implements DataProvider {
     }
 
     public void load() {
-        Dataset<E> dataset = loadOlivetti(30);
-        datasets.put(dataset.getName(), dataset);
-        dataset = loadOlivetti(400);
+        Dataset<E> dataset = loadOlivetti(100);
         datasets.put(dataset.getName(), dataset);
     }
 

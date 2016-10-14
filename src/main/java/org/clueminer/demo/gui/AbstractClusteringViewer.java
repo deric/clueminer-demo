@@ -158,4 +158,8 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
         return clust;
     }
 
+    public void setDataProvider(DataProvider provider) {
+        this.dataProvider = provider;
+    }
+
 }

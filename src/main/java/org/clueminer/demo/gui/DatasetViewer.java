@@ -20,6 +20,7 @@ import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
 import org.clueminer.clustering.api.ClusteringListener;
+import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.utils.Props;
@@ -75,4 +76,6 @@ public interface DatasetViewer<E extends Instance, C extends Cluster<E>> extends
      * @param label
      */
     void assignLabelToSelection(String label);
+
+    void setDataProvider(DataProvider provider);
 }

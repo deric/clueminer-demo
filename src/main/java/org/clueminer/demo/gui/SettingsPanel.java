@@ -65,6 +65,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private JComboBox validationBox;
     private JSpinner spinRepeat;
     private JButton btnExport;
+    private JComboBox cbData;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
     private ClusterEvaluation evaluator;
@@ -169,6 +170,17 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
                 }
             }
         });
+        add(new JLabel("Dataset:"));
+        cbData = new JComboBox(panel.getDatasets());
+        cbData.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.dataChanged((String) cbData.getSelectedItem());
+                execute();
+            }
+        });
+
+        add(cbData);
     }
 
     public void execute() {

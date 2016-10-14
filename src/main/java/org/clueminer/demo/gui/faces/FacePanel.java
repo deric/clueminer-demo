@@ -53,7 +53,7 @@ public class FacePanel<E extends Instance, C extends Cluster<E>> extends BPanel 
     //private static final Logger LOGGER = Logger.getLogger(FacePanel.class.getName());
     private BufferedImage[] faces;
     private final HashMap<Object, Color> colors = new HashMap<>();
-    private final ColorGenerator cg;
+    private ColorGenerator cg;
     private Clustering<E, C> clustering;
 
     public FacePanel(Dataset<E> images) {
@@ -187,6 +187,18 @@ public class FacePanel<E extends Instance, C extends Cluster<E>> extends BPanel 
     @Override
     public boolean isAntiAliasing() {
         return true;
+    }
+
+    public void colorGeneratorChanged(ColorGenerator colorGen) {
+        colors.clear();
+        this.cg = colorGen;
+        System.out.println("changing colors " + cg.getName());
+        cg.reset();
+        for (Cluster<E> c : clustering) {
+            c.setColor(cg.next());
+        }
+        faces = new BufferedImage[cntImages];
+        resetCache();
     }
 
 }

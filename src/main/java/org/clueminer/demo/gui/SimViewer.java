@@ -60,6 +60,7 @@ import org.clueminer.clustering.api.dendrogram.ColorScheme;
 import org.clueminer.clustering.api.factory.Clusterings;
 import org.clueminer.clustering.api.factory.MergeEvaluationFactory;
 import org.clueminer.clustering.gui.colors.ColorSchemeImpl;
+import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -591,6 +592,11 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     private boolean hasViewer() {
         return (mode2d && viewer != null) || (!mode2d && viewer3d != null);
+    }
+
+    @Override
+    public void colorGeneratorChanged(ColorGenerator cg) {
+        //nothing to do
     }
 
 }

@@ -24,6 +24,7 @@ import java.util.Map;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.HierarchicalResult;
+import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -99,6 +100,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
                 MemInfo memInfo = new MemInfo();
                 fireClusteringStarted(dataset, params);
                 exec.setAlgorithm(algorithm);
+                exec.setColorGenerator(cg);
                 clust = exec.clusterRows(dataset, params);
                 memInfo.report();
                 System.out.println("------");
@@ -147,6 +149,11 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
     @Override
     public void assignLabelToSelection(String label) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void colorGeneratorChanged(ColorGenerator cg) {
+        //nothing to do
     }
 
 }

@@ -158,8 +158,16 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
         return clust;
     }
 
+    @Override
     public void setDataProvider(DataProvider provider) {
         this.dataProvider = provider;
     }
+
+    public void setColorGenerator(ColorGenerator cg) {
+        this.cg = cg;
+        colorGeneratorChanged(cg);
+    }
+
+    public abstract void colorGeneratorChanged(ColorGenerator cg);
 
 }

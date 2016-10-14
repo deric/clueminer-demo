@@ -49,6 +49,7 @@ import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.EvaluationTable;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.factory.Clusterings;
+import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -362,6 +363,15 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
 
     public ScatterPlot getViewer() {
         return viewer;
+    }
+
+    @Override
+    public void colorGeneratorChanged(ColorGenerator cg) {
+        cg.reset();
+        for (Cluster<E> c : clust) {
+            c.setColor(cg.next());
+        }
+        fireClusteringChanged(clust);
     }
 
     @Override

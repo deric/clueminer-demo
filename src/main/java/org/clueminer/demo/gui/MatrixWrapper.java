@@ -23,6 +23,7 @@ import java.awt.Insets;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.HierarchicalResult;
+import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -142,6 +143,11 @@ public class MatrixWrapper<E extends Instance, C extends Cluster<E>>
     @Override
     public void assignLabelToSelection(String label) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void colorGeneratorChanged(ColorGenerator cg) {
+        //nothing to do
     }
 
 }

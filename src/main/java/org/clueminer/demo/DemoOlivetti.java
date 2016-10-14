@@ -26,9 +26,9 @@ import org.clueminer.clustering.api.Cluster;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.demo.gui.DendroWrapper;
-import org.clueminer.demo.gui.SettingsPanel;
 import org.clueminer.demo.gui.StatusPanel;
 import org.clueminer.demo.gui.faces.FacesProvider;
+import org.clueminer.demo.gui.faces.FacesSettings;
 import org.clueminer.demo.gui.faces.FacesWrapper;
 
 /**
@@ -40,7 +40,7 @@ public class DemoOlivetti extends BaseFrame {
     private static final long serialVersionUID = 1458227382306409023L;
 
     private FacesWrapper plot;
-    private SettingsPanel settings;
+    private FacesSettings settings;
     private final boolean showDendro = true;
     private DendroWrapper<Instance, Cluster<Instance>> dendro;
 
@@ -90,7 +90,7 @@ public class DemoOlivetti extends BaseFrame {
         c.weightx = c.weighty = 0.2; //no fill while resize
 
         status = new StatusPanel(plot);
-        settings = new SettingsPanel(plot, status);
+        settings = new FacesSettings(plot, status);
         gbl.setConstraints(settings, c);
         add(settings, c);
         //status bar

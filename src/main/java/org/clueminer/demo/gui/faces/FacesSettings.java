@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.clueminer.demo.gui;
+package org.clueminer.demo.gui.faces;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -40,8 +40,12 @@ import org.clueminer.clustering.api.factory.EvaluationFactory;
 import org.clueminer.clustering.gui.ClusteringDialog;
 import org.clueminer.clustering.gui.ClusteringDialogFactory;
 import org.clueminer.clustering.gui.ClusteringExport;
+import org.clueminer.dataset.api.ColorGeneratorFactory;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.demo.gui.ControlListener;
+import org.clueminer.demo.gui.DatasetViewer;
+import org.clueminer.demo.gui.StatusPanel;
 import org.clueminer.dendrogram.FileExportDialog;
 import org.clueminer.utils.Props;
 import org.openide.DialogDescriptor;
@@ -55,7 +59,7 @@ import org.openide.util.ImageUtilities;
  * @param <E>
  * @param <C>
  */
-public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPanel implements ClusteringListener<E, C> {
+public class FacesSettings<E extends Instance, C extends Cluster<E>> extends JPanel implements ClusteringListener<E, C> {
 
     private static final long serialVersionUID = 4694033662557233989L;
 
@@ -66,6 +70,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private JSpinner spinRepeat;
     private JButton btnExport;
     private JComboBox cbData;
+    private JComboBox cbColors;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
     private ClusterEvaluation evaluator;
@@ -73,7 +78,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private final StatusPanel status;
     protected final transient EventListenerList controlListeners = new EventListenerList();
 
-    public SettingsPanel(DatasetViewer panel, StatusPanel status) {
+    public FacesSettings(DatasetViewer panel, StatusPanel status) {
         this.panel = panel;
         optPanels = new HashMap<>();
         this.status = status;
@@ -170,6 +175,28 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
                 }
             }
         });
+        add(new JLabel("Dataset:"));
+        cbData = new JComboBox(panel.getDatasets());
+        cbData.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.dataChanged((String) cbData.getSelectedItem());
+                execute();
+            }
+        });
+
+        add(cbData);
+
+        add(new JLabel("Colors:"));
+        cbColors = new JComboBox(ColorGeneratorFactory.getInstance().getProvidersArray());
+        cbColors.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.setColorGenerator(ColorGeneratorFactory.getInstance().getProvider((String) cbColors.getSelectedItem()));
+            }
+        });
+
+        add(cbColors);
     }
 
     public void execute() {

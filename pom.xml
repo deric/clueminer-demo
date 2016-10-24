@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>guava</artifactId>
+            <artifactId>core-lib-wrapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

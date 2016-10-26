@@ -505,7 +505,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
             MergeEvaluationFactory mef = MergeEvaluationFactory.getInstance();
             if (merger instanceof PairMerger) {
-                String similarityMeasure = pref.get(SIM_MEASURE, BBK1.name);
+                String similarityMeasure = pref.get(SIM_MEASURE, BBK1.NAME);
                 MergeEvaluation me = mef.getProvider(similarityMeasure);
                 ((PairMerger) merger).setMergeEvaluation(me);
             } else if (merger instanceof PairMergerMO) {

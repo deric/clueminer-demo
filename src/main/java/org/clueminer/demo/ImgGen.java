@@ -37,7 +37,7 @@ import org.clueminer.dataset.impl.ArrayDataset;
 import org.clueminer.demo.gui.CliPlot;
 import org.clueminer.demo.gui.ScatterViewer;
 import org.clueminer.exception.ParserError;
-import org.clueminer.io.ARFFHandler;
+import org.clueminer.io.arff.ARFFHandler;
 import org.clueminer.utils.Props;
 import org.openide.util.Exceptions;
 

@@ -63,6 +63,8 @@ import org.clueminer.utils.Props;
 import org.openide.util.Exceptions;
 import org.openide.util.Task;
 import org.openide.util.TaskListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -87,6 +89,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
     private KDTree<E> kdTree;
     private List<E> items;
     private boolean mode2d = true;
+    private static Logger LOG = LoggerFactory.getLogger(ScatterViewer.class);
 
     public ScatterViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -210,6 +213,7 @@ public class ScatterViewer<E extends Instance, C extends Cluster<E>>
             setClustering(clust);
             fireClusteringChanged(clust);
 
+            LOG.info("task finished");
             validate();
             revalidate();
             repaint();

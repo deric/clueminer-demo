@@ -32,6 +32,8 @@ import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.utils.Props;
 import org.openide.util.RequestProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -53,6 +55,7 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
     protected static RequestProcessor RP = new RequestProcessor("Clustering");
     protected RequestProcessor.Task task;
     protected Clustering<E, C> clust;
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractClusteringViewer.class);
 
     public AbstractClusteringViewer(DataProvider<E> provider) {
         dataProvider = provider;
@@ -119,7 +122,7 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
     @Override
     public void dataChanged(String datasetName) {
         setDataset(dataProvider.getDataset(datasetName));
-        System.out.println("dataset changed to " + datasetName + ": " + System.identityHashCode(getDataset()));
+        LOG.info("dataset changed to {}: {}", datasetName, System.identityHashCode(getDataset()));
         datasetChanged(dataset);
     }
 
@@ -163,6 +166,7 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
         this.dataProvider = provider;
     }
 
+    @Override
     public void setColorGenerator(ColorGenerator cg) {
         this.cg = cg;
         colorGeneratorChanged(cg);

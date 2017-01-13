@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.clueminer.chameleon.Chameleon;
 import org.clueminer.clustering.api.factory.MergeEvaluationFactory;
+import static org.clueminer.graph.api.GraphConvertorFactory.INCLUDE_EDGES;
 import org.clueminer.graph.api.GraphStorageFactory;
 import org.clueminer.neighbor.KnnFactory;
 import org.clueminer.utils.Props;
@@ -47,6 +48,7 @@ public class PartitionSettings extends JPanel {
     private JComboBox<String> comboSimilarity;
     private JComboBox<String> comboKnn;
     private JComboBox<String> graphStorage;
+    private JComboBox<String> knnEdges;
 
     public PartitionSettings() {
         initComponents();
@@ -114,6 +116,14 @@ public class PartitionSettings extends JPanel {
 
         c.gridy++;
         c.gridx = 0;
+        add(new JLabel("include edges:"), c);
+        c.gridx = 1;
+        c.weightx = 0.9;
+        knnEdges = new JComboBox(new String[]{"any", "bidirect"});
+        add(knnEdges, c);
+
+        c.gridy++;
+        c.gridx = 0;
         tfAlpha = new JTextField("255", 10);
         add(new JLabel("alpha:"), c);
         c.gridx = 1;
@@ -154,6 +164,7 @@ public class PartitionSettings extends JPanel {
         props.putInt("alpha", Integer.valueOf(tfAlpha.getText()));
         props.put(KnnFactory.KNN_SEARCH, comboKnn.getSelectedItem());
         props.put(Chameleon.GRAPH_STORAGE, graphStorage.getSelectedItem());
+        props.put(INCLUDE_EDGES, knnEdges.getSelectedItem());
 
         return props;
     }

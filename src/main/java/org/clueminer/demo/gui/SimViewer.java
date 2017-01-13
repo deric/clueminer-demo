@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.SortedSet;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.JPanel;
 import org.clueminer.chameleon.Chameleon;
 import static org.clueminer.chameleon.Chameleon.BISECTION;
@@ -89,6 +90,8 @@ import org.clueminer.utils.PairValue;
 import org.clueminer.utils.Props;
 import org.openide.util.Task;
 import org.openide.util.TaskListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Visualize dataset converted to a graph (k-NN graph).
@@ -125,6 +128,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     private Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
     private Stroke basic = new BasicStroke(3);
+    private static final Logger LOG = LoggerFactory.getLogger(SimViewer.class);
+    private ReentrantLock lock = new ReentrantLock();
 
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -163,7 +168,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     public void setClustering(Clustering clusters) {
         if (mode2d) {
-            System.out.println("clusters: " + clusters.size());
+            LOG.info("clusters: {}", clusters.size());
             viewer.setClustering(clusters);
         } else {
             viewer3d.setClustering(clusters);
@@ -174,6 +179,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     @Override
     public void setSize(int w, int h) {
+        LOG.debug("size updated to {}x{}", w, h);
         super.setSize(w, h);
         if (mode2d) {
             viewer.setSize(w, h);
@@ -195,6 +201,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
             @Override
             public void run() {
+                LOG.debug("clustering starts");
                 fireClusteringStarted(dataset, params);
                 //clust = goldenClustering(dataset);
                 if (hasData && merger != null) {
@@ -220,7 +227,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             clustering.add(cluster);
             total += cluster.size();
         }
-        System.out.println("total points: " + total);
+        LOG.info("total points: {}", total);
 
         return clustering;
     }
@@ -231,6 +238,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             setClustering(clust);
             fireClusteringChanged(clust);
 
+            LOG.debug("clustering finished");
             validate();
             revalidate();
             repaint();
@@ -264,9 +272,15 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g);
-        render((Graphics2D) g);
-        revalidate();
+        lock.lock();
+        try {
+            super.paint(g);
+            render((Graphics2D) g);
+            LOG.debug("overlay finished");
+            //revalidate();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void render(Graphics2D g2) {

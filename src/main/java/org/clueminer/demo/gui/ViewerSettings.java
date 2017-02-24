@@ -29,7 +29,6 @@ import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.gui.ClusteringDialog;
-import org.clueminer.clustering.gui.ClusteringExport;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.dendrogram.FileExportDialog;
@@ -38,6 +37,7 @@ import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.ImageUtilities;
+import org.clueminer.clustering.gui.ClusteringExportGui;
 
 /**
  *
@@ -114,7 +114,7 @@ public class ViewerSettings<E extends Instance, C extends Cluster<E>> extends JP
                 //exportDialog.destroy();
 
                 if (dd.getValue() == DialogDescriptor.OK_OPTION) {
-                    ClusteringExport exp = exportDialog.getExporter();
+                    ClusteringExportGui exp = exportDialog.getExporter();
                     System.out.println("clust size: " + panel.getClustering().size());
                     exp.setClustering(panel.getClustering());
                     //exp.setViewer(viewer);

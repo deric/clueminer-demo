@@ -39,7 +39,6 @@ import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.factory.EvaluationFactory;
 import org.clueminer.clustering.gui.ClusteringDialog;
 import org.clueminer.clustering.gui.ClusteringDialogFactory;
-import org.clueminer.clustering.gui.ClusteringExport;
 import org.clueminer.dataset.api.ColorGeneratorFactory;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -52,6 +51,7 @@ import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.ImageUtilities;
+import org.clueminer.clustering.gui.ClusteringExportGui;
 
 /**
  *
@@ -168,7 +168,7 @@ public class FacesSettings<E extends Instance, C extends Cluster<E>> extends JPa
                 //exportDialog.destroy();
 
                 if (dd.getValue() == DialogDescriptor.OK_OPTION) {
-                    ClusteringExport exp = exportDialog.getExporter();
+                    ClusteringExportGui exp = exportDialog.getExporter();
                     exp.setClustering(panel.getClustering());
                     //exp.setViewer(viewer);
                     exp.export();

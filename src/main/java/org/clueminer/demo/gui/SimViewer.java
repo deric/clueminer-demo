@@ -126,8 +126,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private Merger<E> merger;
     private int alpha;
 
-    private Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
-    private Stroke basic = new BasicStroke(3);
+    private final Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
+    private final Stroke basic = new BasicStroke(3);
     private static final Logger LOG = LoggerFactory.getLogger(SimViewer.class);
     private ReentrantLock lock = new ReentrantLock();
 
@@ -395,10 +395,12 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             //g.setColor(c);
             g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha));
             //System.out.println("val: " + value + ", " + colorScheme.getColor(value, min, mid, max));
-            if (direction == EdgeType.BOTH) {
-                g.setStroke(basic);
-            } else {
-                g.setStroke(dashed);
+            if (pref.getBoolean("unidirect_dashed", false)) {
+                if (direction == EdgeType.BOTH) {
+                    g.setStroke(basic);
+                } else {
+                    g.setStroke(dashed);
+                }
             }
             g.draw(new Line2D.Double(source.getX(), source.getY(), target.getX(), target.getY()));
         }

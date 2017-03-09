@@ -45,6 +45,7 @@ public class PartitionSettings extends JPanel {
     private JTextField tfAlpha;
     private JCheckBox chckAutoMaxP;
     private JCheckBox chckPartition;
+    private JCheckBox chckDashedEdges;
     private JComboBox<String> comboSimilarity;
     private JComboBox<String> comboKnn;
     private JComboBox<String> graphStorage;
@@ -116,6 +117,12 @@ public class PartitionSettings extends JPanel {
 
         c.gridy++;
         c.gridx = 0;
+        c.weightx = 0.9;
+        chckDashedEdges = new JCheckBox("dashed not shared neighbor edges", false);
+        add(chckDashedEdges, c);
+
+        c.gridy++;
+        c.gridx = 0;
         add(new JLabel("include edges:"), c);
         c.gridx = 1;
         c.weightx = 0.9;
@@ -165,6 +172,7 @@ public class PartitionSettings extends JPanel {
         props.put(KnnFactory.KNN_SEARCH, comboKnn.getSelectedItem());
         props.put(Chameleon.GRAPH_STORAGE, graphStorage.getSelectedItem());
         props.put(INCLUDE_EDGES, knnEdges.getSelectedItem());
+        props.put("unidirect_dashed", chckDashedEdges.isSelected());
 
         return props;
     }

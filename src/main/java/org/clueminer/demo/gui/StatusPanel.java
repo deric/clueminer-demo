@@ -116,6 +116,14 @@ public class StatusPanel<E extends Instance, C extends Cluster<E>> extends JPane
             System.out.println("avg = " + avg);
             sb.append(", ").append("avg").append(": ").append(decimalFormat.format(avg));
 
+            Cluster noise = clust.getNoise();
+            if (noise != null && noise.size() > 0) {
+                double npct = noise.size() / (double) dataset.size() * 100;
+                System.out.println("npct = " + npct);
+                sb.append(", noise: ").append(noise.size()).append(" (")
+                        .append(decimalFormat.format(npct)).append("%)");
+            }
+
             lbStatus.setText(sb.toString());
         } else {
             lbStatus.setText("Clustering stopped.");

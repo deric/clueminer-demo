@@ -27,6 +27,7 @@ import org.clueminer.clustering.api.ClusteringListener;
 import org.clueminer.clustering.api.Executor;
 import org.clueminer.colors.ColorBrewer;
 import org.clueminer.dataset.api.ColorGenerator;
+import org.clueminer.dataset.api.ColorGeneratorFactory;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
@@ -56,6 +57,7 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
     protected RequestProcessor.Task task;
     protected Clustering<E, C> clust;
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClusteringViewer.class);
+    public static final String CG_CONF = "color_generator";
 
     public AbstractClusteringViewer(DataProvider<E> provider) {
         dataProvider = provider;
@@ -73,6 +75,13 @@ public abstract class AbstractClusteringViewer<E extends Instance, C extends Clu
         }
         //options.setDatasets(dataProvider.getDatasetNames());
         initComponets();
+    }
+
+    public void updateConfiguration(Props params) {
+        if (params.containsKey(CG_CONF)) {
+            String provider = params.get(CG_CONF);
+            cg = ColorGeneratorFactory.getInstance().getProvider(provider);
+        }
     }
 
     protected abstract void initComponets();

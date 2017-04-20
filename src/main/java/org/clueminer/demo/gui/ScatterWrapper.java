@@ -36,6 +36,8 @@ import org.clueminer.scatter.ScatterPlot;
 import org.clueminer.utils.Props;
 import org.openide.util.Task;
 import org.openide.util.TaskListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -49,6 +51,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
     private static final long serialVersionUID = -8355392013651815767L;
 
     private ScatterPlot<E, C> viewer;
+    private static final Logger LOG = LoggerFactory.getLogger(ScatterWrapper.class);
 
     public ScatterWrapper(Map<String, Dataset<E>> data) {
         this(new DataProviderMap(data));
@@ -92,6 +95,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
             @Override
             public void run() {
                 params.put("algorithm", getAlgorithm().getName());
+                updateConfiguration(params);
                 System.out.println(params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
                 Distance func = df.getProvider("Euclidean");
@@ -100,6 +104,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
                 MemInfo memInfo = new MemInfo();
                 fireClusteringStarted(dataset, params);
                 exec.setAlgorithm(algorithm);
+                LOG.debug("using cg: {}", cg.getName());
                 exec.setColorGenerator(cg);
                 clust = exec.clusterRows(dataset, params);
                 memInfo.report();

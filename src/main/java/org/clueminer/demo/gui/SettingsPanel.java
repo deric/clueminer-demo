@@ -39,6 +39,7 @@ import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.factory.EvaluationFactory;
 import org.clueminer.clustering.gui.ClusteringDialog;
 import org.clueminer.clustering.gui.ClusteringDialogFactory;
+import org.clueminer.clustering.gui.ClusteringExportGui;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
 import org.clueminer.dendrogram.FileExportDialog;
@@ -47,7 +48,6 @@ import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.ImageUtilities;
-import org.clueminer.clustering.gui.ClusteringExportGui;
 
 /**
  *
@@ -65,9 +65,10 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private JComboBox validationBox;
     private JSpinner spinRepeat;
     private JButton btnExport;
-    private JComboBox cbData;
+    private JButton btnSettings;
     private final DatasetViewer panel;
     private ClusteringDialog optPanel;
+    private SettingsAdvancedPanel confPanel;
     private ClusterEvaluation evaluator;
     private final HashMap<ClusteringAlgorithm, JPanel> optPanels;
     private final StatusPanel status;
@@ -170,6 +171,24 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
                 }
             }
         });
+
+        btnSettings = new JButton(ImageUtilities.loadImageIcon("org/clueminer/demo/settings16.png", false));
+        btnSettings.setToolTipText("Advanced configuration");
+        btnSettings.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (confPanel == null) {
+                    confPanel = new SettingsAdvancedPanel();
+                }
+
+                DialogDescriptor dd = new DialogDescriptor(confPanel, "Advanced configuration");
+                if (DialogDisplayer.getDefault().notify(dd).equals(NotifyDescriptor.OK_OPTION)) {
+                    execute();
+                }
+            }
+        });
+        add(btnSettings);
     }
 
     public void execute() {
@@ -224,12 +243,17 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
 
     public Props getProps() {
         updateUI(getAlgorithm());
-
+        Props p;
         if (optPanel != null) {
-            return optPanel.getParams();
+            p = optPanel.getParams();
         } else {
-            return new Props();
+            p = new Props();
         }
+        if (confPanel != null) {
+            p.merge(confPanel.getParams());
+        }
+
+        return p;
     }
 
     @Override

@@ -96,7 +96,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
             public void run() {
                 params.put("algorithm", getAlgorithm().getName());
                 updateConfiguration(params);
-                System.out.println(params.toString());
+                LOG.debug("algorithm params: {}", params.toString());
                 DistanceFactory df = DistanceFactory.getInstance();
                 Distance func = df.getProvider("Euclidean");
                 algorithm.setDistanceFunction(func);
@@ -108,7 +108,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
                 exec.setColorGenerator(cg);
                 clust = exec.clusterRows(dataset, params);
                 memInfo.report();
-                System.out.println("------");
+                LOG.debug("------");
             }
 
         });
@@ -125,7 +125,7 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
             revalidate();
             repaint();
         } else {
-            System.err.println("invalid clustering");
+            LOG.error("invalid clustering");
         }
     }
 

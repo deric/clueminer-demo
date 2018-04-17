@@ -48,6 +48,8 @@ import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.util.ImageUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -73,6 +75,7 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
     private final HashMap<ClusteringAlgorithm, JPanel> optPanels;
     private final StatusPanel status;
     protected final transient EventListenerList controlListeners = new EventListenerList();
+    private static final Logger LOG = LoggerFactory.getLogger(SettingsPanel.class);
 
     public SettingsPanel(DatasetViewer panel, StatusPanel status) {
         this.panel = panel;
@@ -213,8 +216,11 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
         if (optPanel != null && optPanel.isUIfor(alg, panel.getDataset())) {
             return optPanel.getPanel();
         } else {
+            LOG.debug("Algorithm: {}",alg.getClass().toString());
             for (ClusteringDialog dlg : ClusteringDialogFactory.getInstance().getAll()) {
-                if (dlg.isUIfor(alg, panel.getDataset())) {
+                boolean isSuitable = dlg.isUIfor(alg, panel.getDataset());
+                LOG.debug("testing dialog {}, applicable?: {}", dlg.getName(), isSuitable);
+                if (isSuitable) {
                     optPanel = dlg;
                     if (!optPanels.containsKey(alg)) {
                         optPanels.put(alg, dlg.getPanel());
@@ -223,6 +229,16 @@ public class SettingsPanel<E extends Instance, C extends Cluster<E>> extends JPa
                 }
             }
         }
+        LOG.debug("Could not find UI for algorithm {}", alg.getName());
+        StringBuilder sb = new StringBuilder();
+        optPanels.keySet().forEach((cAlg) -> {
+            if(sb.length() > 0){
+                sb.append(", ");
+            }
+            sb.append(cAlg.getName());
+        });
+        LOG.debug("Available UIs: [{}]", sb.toString());
+
         //last resort
         return new JPanel();
     }

@@ -108,7 +108,6 @@ public class ScatterWrapper<E extends Instance, C extends Cluster<E>>
                 exec.setColorGenerator(cg);
                 clust = exec.clusterRows(dataset, params);
                 memInfo.report();
-                LOG.debug("------");
             }
 
         });

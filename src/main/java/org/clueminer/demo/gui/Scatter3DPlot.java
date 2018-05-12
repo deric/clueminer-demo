@@ -22,9 +22,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.EventListenerList;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.scatter.RenderingListener;
 import org.math.plot.Plot3DPanel;
 
 /**
@@ -38,6 +40,7 @@ public class Scatter3DPlot<E extends Instance, C extends Cluster<E>> extends JPa
     private static final long serialVersionUID = 8065053854767902112L;
 
     private Plot3DPanel plot;
+    private final transient EventListenerList renderListeners = new EventListenerList();
 
     public Scatter3DPlot() {
         initComponents();
@@ -69,6 +72,7 @@ public class Scatter3DPlot<E extends Instance, C extends Cluster<E>> extends JPa
                 revalidate();
                 validate();
                 repaint();
+                fireComponentRendered();
             }
         });
     }
@@ -93,6 +97,19 @@ public class Scatter3DPlot<E extends Instance, C extends Cluster<E>> extends JPa
         }
 
         return plot;
+    }
+
+    public void addRenderListener(RenderingListener listener) {
+        renderListeners.add(RenderingListener.class, listener);
+    }
+
+    public void fireComponentRendered() {
+        RenderingListener[] listeners;
+
+        listeners = renderListeners.getListeners(RenderingListener.class);
+        for (RenderingListener listener : listeners) {
+            listener.renderingFinished(this);
+        }
     }
 
 }

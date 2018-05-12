@@ -16,22 +16,19 @@
  */
 package org.clueminer.demo.gui;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
+import java.awt.AWTEvent;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.PaintEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +37,9 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.SortedSet;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.clueminer.chameleon.Chameleon;
 import static org.clueminer.chameleon.Chameleon.BISECTION;
 import static org.clueminer.chameleon.Chameleon.GRAPH_STORAGE;
@@ -57,10 +56,8 @@ import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.EvaluationTable;
 import org.clueminer.clustering.api.HierarchicalResult;
 import org.clueminer.clustering.api.MergeEvaluation;
-import org.clueminer.clustering.api.dendrogram.ColorScheme;
 import org.clueminer.clustering.api.factory.Clusterings;
 import org.clueminer.clustering.api.factory.MergeEvaluationFactory;
-import org.clueminer.clustering.gui.colors.ColorSchemeImpl;
 import org.clueminer.dataset.api.ColorGenerator;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
@@ -69,8 +66,6 @@ import static org.clueminer.demo.gui.AbstractClusteringViewer.RP;
 import org.clueminer.dendrogram.DataProviderMap;
 import org.clueminer.distance.EuclideanDistance;
 import org.clueminer.eval.utils.HashEvaluationTable;
-import org.clueminer.graph.api.Edge;
-import org.clueminer.graph.api.EdgeType;
 import org.clueminer.graph.api.Graph;
 import org.clueminer.graph.api.GraphBuilder;
 import org.clueminer.graph.api.GraphConvertor;
@@ -85,6 +80,7 @@ import org.clueminer.partitioning.api.MergerFactory;
 import org.clueminer.partitioning.api.Partitioning;
 import org.clueminer.partitioning.impl.FiducciaMattheyses;
 import org.clueminer.partitioning.impl.RecursiveBisection;
+import org.clueminer.scatter.RenderingListener;
 import org.clueminer.scatter.ScatterPlot;
 import org.clueminer.utils.PairValue;
 import org.clueminer.utils.Props;
@@ -109,27 +105,22 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private Scatter3DPlot viewer3d;
     protected Dimension reqSize = new Dimension(0, 0);
 
-    private static final Color DRAWING_RECT_COLOR = new Color(200, 200, 255);
-    private Rectangle rect = null;
-    private boolean drawing = false;
-    private Point mousePress = null;
     private boolean mode2d = true;
     private GraphConvertor<E> knn;
     private Graph<E> graph;
     private Props pref;
     private boolean hasData = false;
     private boolean hasViewer = false;
-    private PriorityQueue<PairValue<GraphCluster<E>>> pq;
-    private ColorScheme colorScheme;
-    private double min, max, mid;
+    protected PriorityQueue<PairValue<GraphCluster<E>>> pq;
     private int total;
     private Merger<E> merger;
     private int alpha;
+    private JLayeredPane layers;
+    private SimOverlay overlay;
 
-    private final Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
-    private final Stroke basic = new BasicStroke(3);
     private static final Logger LOG = LoggerFactory.getLogger(SimViewer.class);
     private ReentrantLock lock = new ReentrantLock();
+    private Dimension size;
 
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
         this(new DataProviderMap(data));
@@ -141,6 +132,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     @Override
     protected void initComponets() {
+        layers = new JLayeredPane();
+
         GridBagLayout gbl = new GridBagLayout();
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
@@ -150,16 +143,90 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
         //panel = new JLayeredPane();
         viewer = new ScatterPlot();
+        viewer.addRenderListener(new RenderingListener() {
+            @Override
+            public void renderingFinished(Component c) {
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        //paint(getGraphics());
+                        overlay.validate();
+                        overlay.revalidate();
+                        overlay.repaint();
+                    }
+                });
+
+            }
+        });
+        overlay = new SimOverlay(this);
         c.fill = GridBagConstraints.BOTH;
         c.gridx = 0;
         c.gridy = 0;
         c.gridheight = 1;
         c.anchor = GridBagConstraints.NORTHEAST;
         c.weightx = c.weighty = 1.0; //ratio for filling the frame space
-        gbl.setConstraints((Component) viewer, c);
-        this.add((Component) viewer, c);
-        setVisible(true);
-        colorScheme = new ColorSchemeImpl(Color.red, Color.BLACK, Color.GREEN);
+
+        layers.setLayout(new LayoutManager() {
+            @Override
+            public void addLayoutComponent(String name, Component comp) {
+            }
+
+            @Override
+            public void removeLayoutComponent(Component comp) {
+            }
+
+            @Override
+            public Dimension preferredLayoutSize(Container parent) {
+                return viewer.getSize();
+            }
+
+            @Override
+            public Dimension minimumLayoutSize(Container parent) {
+                return viewer.getSize();
+            }
+
+            @Override
+            public void layoutContainer(Container parent) {
+                Insets insets = parent.getInsets();
+                int w = parent.getWidth() - insets.left - insets.right;
+                int h = parent.getHeight() - insets.top - insets.bottom;
+                viewer.setBounds(insets.left, insets.top, w, h);
+                overlay.setBounds(insets.left, insets.top, w, h);
+            }
+        });
+        layers.add(viewer, 1);
+        layers.add(overlay, 0);
+
+        gbl.setConstraints((Component) layers, c);
+        this.add((Component) layers, c);
+        //setVisible(true);
+
+        this.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                //LOG.debug("parent resized, {}", e.getComponent().getSize());
+                size = e.getComponent().getSize();
+                //overlay.sizeUpdated(size);
+                //overlay.repaint();
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                size = e.getComponent().getSize();
+                overlay.sizeUpdated(size);
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+
+            }
+        });
+
     }
 
     public void setGraphConvertor(GraphConvertor<E> graphConv) {
@@ -181,6 +248,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     public void setSize(int w, int h) {
         LOG.debug("size updated to {}x{}", w, h);
         super.setSize(w, h);
+        size = new Dimension(w, h);
         if (mode2d) {
             viewer.setSize(w, h);
         } else {
@@ -207,7 +275,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                 if (hasData && merger != null) {
                     clust = partitionedClustering(merger);
                 }
-
+                LOG.debug("runnable finished");
             }
 
         });
@@ -237,11 +305,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         if (clust != null && clust.size() > 0 && clust.instancesCount() > 0) {
             setClustering(clust);
             fireClusteringChanged(clust);
-
             LOG.debug("clustering finished");
-            validate();
-            revalidate();
-            repaint();
+            //overlay.repaint();
         } else {
             System.err.println("invalid clustering");
         }
@@ -268,154 +333,6 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     @Override
     public void resultUpdate(HierarchicalResult hclust) {
         //
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        lock.lock();
-        try {
-            super.paint(g);
-            render((Graphics2D) g);
-            LOG.debug("overlay finished");
-            //revalidate();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void render(Graphics2D g2) {
-        if (drawing) {
-            g2.setColor(DRAWING_RECT_COLOR);
-            g2.draw(rect);
-        }
-
-        //image = getScreenShot();
-        //Graphics2D g2 = bufferedImage.createGraphics();
-        //g2.drawImage(image, WIDTH, 0, this);
-        Stroke stroke = new BasicStroke(2);
-        g2.setComposite(AlphaComposite.SrcOver);
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        //g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.50f));
-        g2.setStroke(stroke);
-        g2.setColor(new Color(160, 160, 160, 128));
-        g2.setPaint(Color.LIGHT_GRAY);
-
-        //draw selection
-        g2.setColor(Color.RED);
-        Point2D source, target;
-
-        if (dataset != null && hasData) {
-            Iterator<PairValue<GraphCluster<E>>> iter = pq.iterator();
-            PairValue<GraphCluster<E>> elem;
-
-            double edgeMin = Double.MAX_VALUE;
-            double edgeMax = Double.MIN_VALUE;
-            double value;
-
-            while (iter.hasNext()) {
-                elem = iter.next();
-                source = translate(elem.A.getCentroid());
-                //source = translate(elem.A.get(0));
-                target = translate(elem.B.getCentroid());
-                //target = translate(elem.B.get(0));
-                //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
-                value = elem.getValue();
-                drawLine(g2, source, target, value, EdgeType.NONE);
-
-                if (value > edgeMax) {
-                    edgeMax = value;
-                }
-                if (value > 0 && value < edgeMin) {
-                    edgeMin = value;
-                }
-            }
-
-            max = edgeMax;
-            mid = (edgeMax - edgeMin) / 2.0;
-            min = edgeMin;
-            /* System.out.println("==== partition");
-             * System.out.println("min = " + min);
-             * System.out.println("mid = " + mid);
-             * System.out.println("max = " + max); */
-        } else if (graph != null) {
-            double edgeMin = Double.MAX_VALUE;
-            double edgeMax = Double.MIN_VALUE;
-
-            for (Edge e : graph.getEdges()) {
-                source = translate((E) e.getSource().getInstance());
-                //source = translate(elem.A.get(0));
-                target = translate((E) e.getTarget().getInstance());
-                //target = translate(elem.B.get(0));
-                //drawCircle(g2, translate((E) other.getInstance()), stroke, 4);
-                drawLine(g2, source, target, e.getWeight(), e.getDirection());
-
-                if (e.getWeight() > edgeMax) {
-                    edgeMax = e.getWeight();
-                }
-                if (e.getWeight() > 0 && e.getWeight() < edgeMin) {
-                    edgeMin = e.getWeight();
-                }
-            }
-            /* System.out.println("=====edges ");
-             * max = edgeMax;
-             * mid = (edgeMax - edgeMin) / 2.0;
-             * min = edgeMin;
-             * System.out.println("min = " + min);
-             * System.out.println("mid = " + mid);
-             * System.out.println("max = " + max); */
-        }
-
-        if (merger != null) {
-            g2.setColor(Color.ORANGE);
-            for (Cluster<E> cluster : merger.getClusters()) {
-                if (cluster.size() == 1) {
-                    //drawCircle(g2, translate((E) cluster.get(0)), stroke, 4);
-                    drawCross(g2, translate(cluster.get(0)), stroke, 15, Color.BLACK);
-                }
-            }
-        }
-        //Area fill = new Area(new Rectangle(new Point(0, 0), getSize()));
-        //g2.fill(fill);
-        //g2.draw(selection);
-        g2.dispose();
-    }
-
-    private void drawCross(Graphics2D g, Point2D point, Stroke stroke, int diameter, Color color) {
-        g.setColor(color);
-        g.draw(new Line2D.Double(point.getX() - diameter, point.getY() + diameter, point.getX() + diameter, point.getY() - diameter));
-        g.draw(new Line2D.Double(point.getX() - diameter, point.getY() - diameter, point.getX() + diameter, point.getY() + diameter));
-        drawCircle(g, point, stroke, 6);
-
-    }
-
-    private void drawLine(Graphics2D g, Point2D source, Point2D target, double value, EdgeType direction) {
-        Color c;
-        if (value > 0) {
-            c = colorScheme.getColor(value, min, mid, max);
-            //g.setColor(c);
-            g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha));
-            //System.out.println("val: " + value + ", " + colorScheme.getColor(value, min, mid, max));
-            if (pref.getBoolean("unidirect_dashed", false)) {
-                if (direction == EdgeType.BOTH) {
-                    g.setStroke(basic);
-                } else {
-                    g.setStroke(dashed);
-                }
-            }
-            g.draw(new Line2D.Double(source.getX(), source.getY(), target.getX(), target.getY()));
-        }
-    }
-
-    public void drawCircle(Graphics2D g, Point2D point, Stroke stroke, int markerSize) {
-        g.setStroke(stroke);
-        double halfSize = (double) markerSize / 2;
-        Shape circle = new Ellipse2D.Double(point.getX() - halfSize, point.getY() - halfSize, markerSize, markerSize);
-        g.fill(circle);
-
-    }
-
-    private Point2D translate(E inst) {
-        return viewer.posOnCanvas(inst.get(0), inst.get(1));
     }
 
     public Clustering goldenClustering(Dataset<? extends Instance> dataset) {
@@ -613,6 +530,30 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     @Override
     public void colorGeneratorChanged(ColorGenerator cg) {
         //nothing to do
+    }
+
+    protected boolean hasData() {
+        return hasData;
+    }
+
+    protected Merger<E> getMerger() {
+        return merger;
+    }
+
+    protected int getAlpha() {
+        return alpha;
+    }
+
+    protected Graph<E> getGraph() {
+        return graph;
+    }
+
+    protected Props getPref() {
+        return pref;
+    }
+
+    protected Point2D translate(E inst) {
+        return viewer.posOnCanvas(inst.get(0), inst.get(1));
     }
 
 }

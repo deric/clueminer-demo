@@ -112,7 +112,7 @@ public class PartitionSettings extends JPanel {
         c.gridy++;
         c.gridx = 0;
         c.weightx = 0.9;
-        chckPartition = new JCheckBox("run partitioning", true);
+        chckPartition = new JCheckBox("run partitioning", false);
         add(chckPartition, c);
 
         c.gridy++;

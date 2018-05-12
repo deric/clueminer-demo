@@ -66,6 +66,7 @@ public class SimSettings<E extends Instance, C extends Cluster<E>> extends JPane
         setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
         dataBox = new JComboBox();
+        dataBox.setSelectedItem("zelnik4");
         dataBox.addActionListener(new ActionListener() {
 
             @Override

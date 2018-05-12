@@ -31,7 +31,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
-import javax.swing.JPanel;
 import org.clueminer.chameleon.GraphCluster;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.dendrogram.ColorScheme;
@@ -41,13 +40,15 @@ import org.clueminer.graph.api.Edge;
 import org.clueminer.graph.api.EdgeType;
 import org.clueminer.gui.BPanel;
 import org.clueminer.utils.PairValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Graph edges visualization
  *
  * @author deric
  */
-public class SimOverlay<E extends Instance, C extends Cluster<E>> extends JPanel {
+public class SimOverlay<E extends Instance, C extends Cluster<E>> extends BPanel {
 
     private final Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
     private final Stroke basic = new BasicStroke(3);
@@ -59,6 +60,7 @@ public class SimOverlay<E extends Instance, C extends Cluster<E>> extends JPanel
     private SimViewer<E, Cluster<E>> parent;
     private ColorScheme colorScheme;
     private double min, max, mid;
+    private static final Logger LOG = LoggerFactory.getLogger(SimOverlay.class);
 
     public SimOverlay(SimViewer viewer) {
         setLayout(null);
@@ -75,7 +77,7 @@ public class SimOverlay<E extends Instance, C extends Cluster<E>> extends JPanel
             g2.setColor(DRAWING_RECT_COLOR);
             g2.draw(rect);
         }
-
+        //   g2.setPaintMode();
         //image = getScreenShot();
         //Graphics2D g2 = bufferedImage.createGraphics();
         //g2.drawImage(image, WIDTH, 0, this);
@@ -165,7 +167,7 @@ public class SimOverlay<E extends Instance, C extends Cluster<E>> extends JPanel
         //Area fill = new Area(new Rectangle(new Point(0, 0), getSize()));
         //g2.fill(fill);
         //g2.draw(selection);
-        g2.dispose();
+        //g2.dispose();
     }
 
     private void drawCross(Graphics2D g, Point2D point, Stroke stroke, int diameter, Color color) {
@@ -203,7 +205,7 @@ public class SimOverlay<E extends Instance, C extends Cluster<E>> extends JPanel
     }
 
     public void sizeUpdated(Dimension size) {
-        //this.realSize = size;
+        this.realSize = size;
     }
 
     public boolean hasData() {

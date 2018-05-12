@@ -16,19 +16,12 @@
  */
 package org.clueminer.demo.gui;
 
-import java.awt.AWTEvent;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.Toolkit;
-import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.PaintEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,8 +29,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.SortedSet;
-import java.util.concurrent.locks.ReentrantLock;
-import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.clueminer.chameleon.Chameleon;
@@ -115,11 +106,9 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
     private int total;
     private Merger<E> merger;
     private int alpha;
-    private JLayeredPane layers;
     private SimOverlay overlay;
 
     private static final Logger LOG = LoggerFactory.getLogger(SimViewer.class);
-    private ReentrantLock lock = new ReentrantLock();
     private Dimension size;
 
     public SimViewer(Map<String, Dataset<? extends Instance>> data) {
@@ -132,8 +121,6 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
 
     @Override
     protected void initComponets() {
-        layers = new JLayeredPane();
-
         GridBagLayout gbl = new GridBagLayout();
         setLayout(gbl);
         GridBagConstraints c = new GridBagConstraints();
@@ -151,9 +138,9 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
                     @Override
                     public void run() {
                         //paint(getGraphics());
-                        overlay.validate();
+                        /*  overlay.validate();
                         overlay.revalidate();
-                        overlay.repaint();
+                        overlay.repaint();*/
                     }
                 });
 
@@ -167,39 +154,10 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         c.anchor = GridBagConstraints.NORTHEAST;
         c.weightx = c.weighty = 1.0; //ratio for filling the frame space
 
-        layers.setLayout(new LayoutManager() {
-            @Override
-            public void addLayoutComponent(String name, Component comp) {
-            }
-
-            @Override
-            public void removeLayoutComponent(Component comp) {
-            }
-
-            @Override
-            public Dimension preferredLayoutSize(Container parent) {
-                return viewer.getSize();
-            }
-
-            @Override
-            public Dimension minimumLayoutSize(Container parent) {
-                return viewer.getSize();
-            }
-
-            @Override
-            public void layoutContainer(Container parent) {
-                Insets insets = parent.getInsets();
-                int w = parent.getWidth() - insets.left - insets.right;
-                int h = parent.getHeight() - insets.top - insets.bottom;
-                viewer.setBounds(insets.left, insets.top, w, h);
-                overlay.setBounds(insets.left, insets.top, w, h);
-            }
-        });
-        layers.add(viewer, 1);
-        layers.add(overlay, 0);
-
-        gbl.setConstraints((Component) layers, c);
-        this.add((Component) layers, c);
+        viewer.addLayer(overlay);
+        //layers.add(overlay, 0);
+        gbl.setConstraints((Component) viewer, c);
+        this.add((Component) viewer, c);
         //setVisible(true);
 
         this.addComponentListener(new ComponentListener() {
@@ -207,7 +165,7 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
             public void componentResized(ComponentEvent e) {
                 //LOG.debug("parent resized, {}", e.getComponent().getSize());
                 size = e.getComponent().getSize();
-                //overlay.sizeUpdated(size);
+                overlay.sizeUpdated(size);
                 //overlay.repaint();
             }
 
@@ -477,6 +435,8 @@ public class SimViewer<E extends Instance, C extends Cluster<E>>
         validate();
         revalidate();
         repaint();
+        overlay.resetCache();
+        viewer.repaint();
     }
 
     private int determineK(Dataset<E> dataset) {

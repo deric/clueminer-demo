@@ -18,7 +18,6 @@ package org.clueminer.demo.gui;
 
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
-import org.clueminer.clustering.ClusteringExecutorCached;
 import org.clueminer.clustering.api.Cluster;
 import org.clueminer.clustering.api.Clustering;
 import org.clueminer.clustering.api.ClusteringAlgorithm;
@@ -31,6 +30,7 @@ import org.clueminer.dataset.api.ColorGeneratorFactory;
 import org.clueminer.dataset.api.DataProvider;
 import org.clueminer.dataset.api.Dataset;
 import org.clueminer.dataset.api.Instance;
+import org.clueminer.exec.ClusteringExecutorCached;
 import org.clueminer.utils.Props;
 import org.openide.util.RequestProcessor;
 import org.slf4j.Logger;

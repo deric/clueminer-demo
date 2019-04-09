@@ -17,7 +17,6 @@
 package org.clueminer.demo.gui;
 
 import java.util.Map;
-import org.clueminer.clustering.ClusteringExecutorCached;
 import org.clueminer.clustering.api.AlgParams;
 import org.clueminer.clustering.api.Executor;
 import org.clueminer.clustering.api.dendrogram.DendrogramMapping;
@@ -29,6 +28,7 @@ import org.clueminer.dendrogram.DendroPanel;
 import org.clueminer.dgram.DgViewer;
 import org.clueminer.distance.api.DistanceFactory;
 import org.clueminer.distance.api.Distance;
+import org.clueminer.exec.ClusteringExecutorCached;
 import org.clueminer.report.MemInfo;
 import org.clueminer.utils.Props;
 
